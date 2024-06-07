@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "334523270436",
+    "project_id": "dentalprogapplication",
+    "storage_bucket": "dentalprogapplication.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334523270436:android:7ba09f28a8dbcfdfba5fb1",
+        "android_client_info": {
+          "package_name": "com.example.dentalprogapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW0ko8mOgmRzkdcous-bEX6hboDBWEMxo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
