@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
@@ -74,7 +73,7 @@ class _DownloadViewPageState extends State<DownloadViewPage> {
               children: [
                 // Display the logo at the top
                 pw.Container(
-                  padding: pw.EdgeInsets.only(bottom: 10.0),
+                  padding: const pw.EdgeInsets.only(bottom: 10.0),
                   child: pw.Image(logoImage),
                 ),
                 // Display user information table
@@ -142,11 +141,11 @@ class _DownloadViewPageState extends State<DownloadViewPage> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Data Download'),
+          title: const Text('Data Download'),
           actions: [
             IconButton(
               onPressed: _printPDF,
-              icon: Icon(Icons.print),
+              icon: const Icon(Icons.print),
             ),
           ],
         ),
@@ -173,7 +172,7 @@ class _DownloadViewPageState extends State<DownloadViewPage> {
                 )
               : ElevatedButton(
                   onPressed: _generatePDF,
-                  child: Text('Generate PDF'),
+                  child: const Text('Generate PDF'),
                 ),
         ),
       ),

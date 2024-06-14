@@ -185,7 +185,7 @@ class _schedulePage extends State<schedulePage> {
                                         TextButton(
                                           style: const ButtonStyle(
                                               backgroundColor:
-                                                  MaterialStatePropertyAll(
+                                                  WidgetStatePropertyAll(
                                                       Colors.redAccent)),
                                           onPressed: () {
                                             FirebaseFirestore.instance

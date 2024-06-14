@@ -294,7 +294,7 @@ class _user_schedulePage extends State<user_schedulePage> {
                                                                     TextButton(
                                                                       style: const ButtonStyle(
                                                                           backgroundColor:
-                                                                              MaterialStatePropertyAll(Colors.redAccent)),
+                                                                              WidgetStatePropertyAll(Colors.redAccent)),
                                                                       onPressed:
                                                                           () async {
                                                                         QuerySnapshot querySnapshot = await FirebaseFirestore

@@ -87,7 +87,7 @@ class _welcomePage extends State<welcomePage> {
                           ),
                         ),
                         const SizedBox(
-                            width: 10), // Add some space between the containers
+                            width: 10),
                         Expanded(
                           child: GestureDetector(
                             child: Container(
@@ -161,7 +161,7 @@ class _welcomePage extends State<welcomePage> {
                             onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const recordsPage())),
+                                    builder: (context) => const RecordsPage())),
                           ),
                         ),
                         const SizedBox(

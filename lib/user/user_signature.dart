@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -26,12 +24,14 @@ class classSignature extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -124,12 +124,12 @@ class _MyHomePageState extends State<MyHomePage> {
                           print('Signature uploaded to Firebase Storage'));
 
                       // Clear the signature pad
-                      sign?.clear();
+                      sign.clear();
                       setState(() {
                         _img = ByteData(0);
                       });
                     },
-                    child: Text("Save"),
+                    child: const Text("Save"),
                   ),
                   MaterialButton(
                       color: Colors.grey,
@@ -141,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         });
                         debugPrint("cleared");
                       },
-                      child: Text("Clear")),
+                      child: const Text("Clear")),
                 ],
               ),
               Row(
@@ -155,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         });
                         debugPrint("change color");
                       },
-                      child: Text("Change color")),
+                      child: const Text("Change color")),
                   MaterialButton(
                       onPressed: () {
                         setState(() {
@@ -166,7 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           debugPrint("change stroke width to $selection");
                         });
                       },
-                      child: Text("Change stroke width")),
+                      child: const Text("Change stroke width")),
                 ],
               ),
             ],

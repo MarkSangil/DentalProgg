@@ -4,7 +4,6 @@ import 'package:dentalprogapplication/admin/dashboard.dart';
 import 'package:dentalprogapplication/admin/message.dart';
 import 'package:dentalprogapplication/admin/records.dart';
 import 'package:dentalprogapplication/admin/top.dart';
-import 'package:dentalprogapplication/admin/transaction.dart';
 import 'package:dentalprogapplication/logout.dart';
 import 'package:flutter/material.dart';
 
@@ -161,7 +160,7 @@ class _welcomePage extends State<welcomePage> {
                             onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const recordsPage())),
+                                    builder: (context) => const RecordsPage())),
                           ),
                         ),
                         const SizedBox(

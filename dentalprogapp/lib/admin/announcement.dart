@@ -189,7 +189,7 @@ class _announcementPage extends State<announcementPage> {
                                       style: const TextStyle(fontSize: 22),
                                       keyboardType: TextInputType.multiline,
                                       maxLines:
-                                          null, // Set to null for unlimited lines, or a specific number
+                                          null,
                                       minLines: 3,
                                       decoration: const InputDecoration(
                                           border: InputBorder.none),
@@ -213,8 +213,8 @@ class _announcementPage extends State<announcementPage> {
                                             color: Colors.white),
                                       ),
                                       onPressed: () {
-                                        Controller().Announcement(
-                                            title.text, description.text);
+                                        String timestamp = DateTime.now().toString();
+                                        Controller().Announcement(title.text, description.text, timestamp);
                                         showDialog(
                                           context: context,
                                           builder: (BuildContext context) {
