@@ -126,9 +126,9 @@ class _user_profilePage extends State<user_profilePage> {
           Navigator.of(context).pop(true);
         });
 
-        return AlertDialog(
-          title: const Text('Waiting...'),
-          content: const Text("Waiting to Upload Image to firebase"),
+        return const AlertDialog(
+          title: Text('Waiting...'),
+          content: Text("Waiting to Upload Image to firebase"),
         );
       },
     );

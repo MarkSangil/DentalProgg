@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Controller {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
-  // ignore: non_constant_identifier_names
   Register(String name, String email, String password) async {
     UserCredential userCredential = await auth.createUserWithEmailAndPassword(
         email: email, password: password);
@@ -25,12 +24,10 @@ class Controller {
     });
   }
 
-  // ignore: non_constant_identifier_names
   Login(String email, String password) async {
     await auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  // ignore: non_constant_identifier_names
   Announcement(String title, String description, String formattedDateTime) {
     FirebaseFirestore.instance.collection('announcement').doc().set({
       'title': title,
@@ -39,15 +36,14 @@ class Controller {
     });
   }
 
-  // ignore: non_constant_identifier_names
-  Payment(String appointmentId, String user_id, String name, String amount,
+  Payment(String appointmentId, String userId, String name, String amount,
       String paymentmethod, String selectedDentalServices) {
     FirebaseFirestore.instance
         .collection('transactions')
         .doc(appointmentId)
         .set({
       'appointmentId': appointmentId,
-      'user_id': user_id,
+      'user_id': userId,
       'name': name,
       'amount': amount,
       'paymentmethod': paymentmethod,
@@ -62,7 +58,6 @@ class Controller {
     }, SetOptions(merge: true));
   }
 
-  // ignore: non_constant_identifier_names
   Consultation(String uid, String name, String description) {
     FirebaseFirestore.instance.collection('consultation').doc().set({
       'uid': uid,
@@ -71,7 +66,6 @@ class Controller {
     });
   }
 
-  // ignore: non_constant_identifier_names
   Prescription(String uid, String presciption, String date) {
     FirebaseFirestore.instance.collection('prescription').doc().set({
       'uid': uid,
@@ -80,7 +74,6 @@ class Controller {
     });
   }
 
-  // ignore: non_constant_identifier_names
   Profile(
       String uid,
       String name,

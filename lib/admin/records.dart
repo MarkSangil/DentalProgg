@@ -1,154 +1,98 @@
-// import 'package:dentalprogapplication/authentication/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dentalprogapplication/admin/back.dart';
-import 'package:dentalprogapplication/admin/recordsview.dart';
 import 'package:flutter/material.dart';
+import 'package:dentalprogapplication/admin/recordsview.dart';
 
 void main() {
-  runApp(const recordsPage());
+  runApp(const RecordsPage());
 }
 
-// ignore: camel_case_types
-class recordsPage extends StatefulWidget {
-  const recordsPage({super.key});
+class RecordsPage extends StatefulWidget {
+  const RecordsPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _recordsPage createState() => _recordsPage();
+  _RecordsPageState createState() => _RecordsPageState();
 }
 
-// ignore: camel_case_types
-class _recordsPage extends State<recordsPage> {
+class _RecordsPageState extends State<RecordsPage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: Stack(
-          children: [
-            // Background Image
-            Image.asset(
-              'asset/bg.jpg',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            ),
-
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-              ),
-              margin: const EdgeInsets.only(top: 10),
-              child: ListView(
-                children: [
-                  const backPage(),
-                  Container(
-                    margin: const EdgeInsets.only(top: 150),
-                    padding: const EdgeInsets.all(5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          alignment: Alignment.center,
-                          width: 150,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: const Color(0xddD21f3C),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const SizedBox(
-                            child: Image(
-                              width: 150,
-                              image: AssetImage('asset/records.png'),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(
-                            width: 10), // Add some space between the containers
-
-                        const Column(
-                          children: [
-                            Text(
-                              'Records',
-                              style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.all(50),
-                  ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height / 3,
-                    child: SingleChildScrollView(
-                      child: StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('users')
-                            .where('type', isEqualTo: 'customer')
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            final data = snapshot.data?.docs ?? [];
-                            return Center(
-                              child: Column(
-                                children: [
-                                  for (var doc in data)
-                                    Container(
-                                      margin: const EdgeInsets.all(5),
-                                      child: GestureDetector(
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          width: 200,
-                                          padding: const EdgeInsets.all(15),
-                                          decoration: BoxDecoration(
-                                              color: const Color(0xddD21f3C),
-                                              borderRadius:
-                                                  BorderRadius.circular(30)),
-                                          child: Text(
-                                            doc['name'],
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => recordsviewPage(
-                                                uid: doc['uid'],
-                                                age: doc['age'],
-                                                address: doc['address'],
-                                                gender: doc['gender'],
-                                                contact: doc['contact'],
-                                                name: doc[
-                                                    'name']), // Assuming DentistPage is a constant widget
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            );
-                          } else {
-                            return const Text('NO DATA');
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: Text('Records',
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.search, color: Colors.black),
+              onPressed: () {},
             )
           ],
+        ),
+        body: Container(
+          padding: EdgeInsets.all(8.0),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .where('type', isEqualTo: 'customer')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    headingRowColor: MaterialStateColor.resolveWith(
+                        (states) => Colors.pink.shade200),
+                    dataRowColor: MaterialStateColor.resolveWith(
+                        (states) => Colors.white),
+                    columns: const [
+                      DataColumn(
+                          label: Text('Name',
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                      DataColumn(
+                          label: Text('Details',
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                    ],
+                    rows: snapshot.data!.docs
+                        .map<DataRow>((DocumentSnapshot document) {
+                      return DataRow(cells: [
+                        DataCell(Text(document['name'])),
+                        DataCell(IconButton(
+                          icon: Icon(Icons.info_outline),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => recordsviewPage(
+                                  uid: document['uid'],
+                                  age: document['age'],
+                                  address: document['address'],
+                                  gender: document['gender'],
+                                  contact: document['contact'],
+                                  name: document['name'],
+                                ),
+                              ),
+                            );
+                          },
+                        )),
+                      ]);
+                    }).toList(),
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return CircularProgressIndicator();
+              }
+            },
+          ),
         ),
       ),
     );

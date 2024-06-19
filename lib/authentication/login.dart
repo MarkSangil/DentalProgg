@@ -4,22 +4,20 @@ import 'package:dentalprogapplication/authentication/register.dart';
 import 'package:dentalprogapplication/controller/controller.dart';
 import 'package:dentalprogapplication/user/user_welcome.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const loginPage());
 }
 
-// ignore: camel_case_types
 class loginPage extends StatefulWidget {
-  const loginPage({super.key});
+  const loginPage({Key? key}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
-  _loginPage createState() => _loginPage();
+  _loginPageState createState() => _loginPageState();
 }
 
-// ignore: camel_case_types
-class _loginPage extends State<loginPage> {
+class _loginPageState extends State<loginPage> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
   bool _isObscure = true;
@@ -31,19 +29,16 @@ class _loginPage extends State<loginPage> {
       home: Scaffold(
         body: Stack(
           children: [
-            // Background Image
             Image.asset(
               'asset/bg.jpg',
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
             ),
-            // Other widgets on top of the background image
             Container(
               padding: const EdgeInsets.all(30),
               child: ListView(
                 children: [
-                  // Your existing widgets here
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 110, vertical: 50),
@@ -51,7 +46,6 @@ class _loginPage extends State<loginPage> {
                       borderRadius: BorderRadius.circular(150),
                       child: Image.asset(
                         'asset/logo.png',
-                        // You can add additional properties like width, height, fit, etc.
                       ),
                     ),
                   ),
@@ -86,9 +80,8 @@ class _loginPage extends State<loginPage> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             image: const DecorationImage(
-                              image: AssetImage(
-                                  'asset/input1.png'), // Replace 'your_image_path_here.jpg' with your image asset path
-                              fit: BoxFit.cover, // Adjust the fit as needed
+                              image: AssetImage('asset/input1.png'),
+                              fit: BoxFit.cover,
                             ),
                           ),
                           child: TextField(
@@ -113,26 +106,22 @@ class _loginPage extends State<loginPage> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             image: const DecorationImage(
-                              image: AssetImage(
-                                  'asset/input1.png'), // Replace 'your_image_path_here.jpg' with your image asset path
-                              fit: BoxFit.cover, // Adjust the fit as needed
+                              image: AssetImage('asset/input1.png'),
+                              fit: BoxFit.cover,
                             ),
                           ),
                           child: TextField(
                             controller: password,
-                            obscureText:
-                                _isObscure, // Set the obscureText property
+                            obscureText: _isObscure,
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               suffixIcon: IconButton(
                                 icon: Icon(_isObscure
                                     ? Icons.visibility_off
-                                    : Icons
-                                        .visibility), // Toggle visibility icon
+                                    : Icons.visibility),
                                 onPressed: () {
                                   setState(() {
-                                    _isObscure =
-                                        !_isObscure; // Toggle the value
+                                    _isObscure = !_isObscure;
                                   });
                                 },
                               ),
@@ -165,16 +154,18 @@ class _loginPage extends State<loginPage> {
                                     .then((QuerySnapshot querySnapshot) {
                                   for (QueryDocumentSnapshot doc
                                       in querySnapshot.docs) {
-                                    // Access the email field from the document
                                     String type = doc['type'];
-
                                     if (type == 'admin') {
+                                      // Cache admin status
+                                      cacheAdminStatus(true);
                                       Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
                                                   const welcomePage()));
                                     } else {
+                                      // Cache regular user status
+                                      cacheAdminStatus(false);
                                       Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
@@ -195,8 +186,7 @@ class _loginPage extends State<loginPage> {
                                       actions: [
                                         TextButton(
                                           onPressed: () {
-                                            Navigator.of(context)
-                                                .pop(); // Close the dialog
+                                            Navigator.of(context).pop();
                                           },
                                           child: const Text('OK'),
                                         ),
@@ -205,12 +195,6 @@ class _loginPage extends State<loginPage> {
                                   },
                                 );
                               });
-
-                              // Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //
-                              //      builder: (context) => welcomePage()));
                             },
                           ),
                         ),
@@ -252,5 +236,10 @@ class _loginPage extends State<loginPage> {
         ),
       ),
     );
+  }
+
+  Future<void> cacheAdminStatus(bool isAdmin) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isAdmin', isAdmin);
   }
 }
