@@ -4,19 +4,20 @@ import 'package:dentalprogapplication/authentication/register.dart';
 import 'package:dentalprogapplication/controller/controller.dart';
 import 'package:dentalprogapplication/user/user_welcome.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const loginPage());
 }
 
 class loginPage extends StatefulWidget {
-  const loginPage({super.key});
+  const loginPage({Key? key}) : super(key: key);
 
   @override
-  _loginPage createState() => _loginPage();
+  _loginPageState createState() => _loginPageState();
 }
 
-class _loginPage extends State<loginPage> {
+class _loginPageState extends State<loginPage> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
   bool _isObscure = true;
@@ -79,8 +80,7 @@ class _loginPage extends State<loginPage> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             image: const DecorationImage(
-                              image: AssetImage(
-                                  'asset/input1.png'),
+                              image: AssetImage('asset/input1.png'),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -106,26 +106,22 @@ class _loginPage extends State<loginPage> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             image: const DecorationImage(
-                              image: AssetImage(
-                                  'asset/input1.png'),
+                              image: AssetImage('asset/input1.png'),
                               fit: BoxFit.cover,
                             ),
                           ),
                           child: TextField(
                             controller: password,
-                            obscureText:
-                                _isObscure,
+                            obscureText: _isObscure,
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               suffixIcon: IconButton(
                                 icon: Icon(_isObscure
                                     ? Icons.visibility_off
-                                    : Icons
-                                        .visibility),
+                                    : Icons.visibility),
                                 onPressed: () {
                                   setState(() {
-                                    _isObscure =
-                                        !_isObscure;
+                                    _isObscure = !_isObscure;
                                   });
                                 },
                               ),
@@ -160,12 +156,16 @@ class _loginPage extends State<loginPage> {
                                       in querySnapshot.docs) {
                                     String type = doc['type'];
                                     if (type == 'admin') {
+                                      // Cache admin status
+                                      cacheAdminStatus(true);
                                       Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
                                                   const welcomePage()));
                                     } else {
+                                      // Cache regular user status
+                                      cacheAdminStatus(false);
                                       Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
@@ -186,8 +186,7 @@ class _loginPage extends State<loginPage> {
                                       actions: [
                                         TextButton(
                                           onPressed: () {
-                                            Navigator.of(context)
-                                                .pop(); // Close the dialog
+                                            Navigator.of(context).pop();
                                           },
                                           child: const Text('OK'),
                                         ),
@@ -196,12 +195,6 @@ class _loginPage extends State<loginPage> {
                                   },
                                 );
                               });
-
-                              // Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //
-                              //      builder: (context) => welcomePage()));
                             },
                           ),
                         ),
@@ -243,5 +236,10 @@ class _loginPage extends State<loginPage> {
         ),
       ),
     );
+  }
+
+  Future<void> cacheAdminStatus(bool isAdmin) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isAdmin', isAdmin);
   }
 }

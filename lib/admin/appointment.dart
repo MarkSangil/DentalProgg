@@ -9,16 +9,13 @@ void main() {
   runApp(const appointmentPage());
 }
 
-// ignore: camel_case_types
 class appointmentPage extends StatefulWidget {
   const appointmentPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _appointmentPage createState() => _appointmentPage();
 }
 
-// ignore: camel_case_types
 class _appointmentPage extends State<appointmentPage> {
   @override
   Widget build(BuildContext context) {
@@ -50,7 +47,7 @@ class _appointmentPage extends State<appointmentPage> {
                         children: [
                           Container(
                             alignment: Alignment.center,
-                            width: 130,
+                            width: 50,
                             padding: const EdgeInsets.symmetric(
                                 vertical: 15, horizontal: 18),
                             decoration: BoxDecoration(
@@ -64,11 +61,7 @@ class _appointmentPage extends State<appointmentPage> {
                               ),
                             ),
                           ),
-
-                          const SizedBox(
-                              width:
-                                  10), // Add some space between the containers
-
+                          const SizedBox(width: 10),
                           const Column(
                             children: [
                               Text(
@@ -97,8 +90,7 @@ class _appointmentPage extends State<appointmentPage> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: ((context) =>
-                                          const schedulePage())));
+                                      builder: ((context) => SchedulePage())));
                             },
                             child: const Text(
                               'ADD SCHEDULE',
@@ -126,7 +118,6 @@ class _appointmentPage extends State<appointmentPage> {
                                     MainAxisAlignment.spaceAround,
                                 children: [
                                   const FaIcon(
-                                    // ignore: deprecated_member_use
                                     FontAwesomeIcons.listCheck,
                                     size: 50,
                                     color: Colors.white,
@@ -157,7 +148,6 @@ class _appointmentPage extends State<appointmentPage> {
                                   builder: ((context, snapshot) {
                                     if (snapshot.hasData) {
                                       final data = snapshot.data?.docs ?? [];
-
                                       return Center(
                                         child: Table(
                                           children: [
