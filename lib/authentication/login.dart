@@ -25,6 +25,7 @@ class _loginPageState extends State<loginPage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(fontFamily: "Poppins"),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Stack(
@@ -204,18 +205,11 @@ class _loginPageState extends State<loginPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
-                              'YOU DON`T HAVE AN ACCOUNT?',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
+                            const Text('You don\'t have an account? '),
                             GestureDetector(
                               child: const Text(
-                                'REGISTER',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
+                                'Register',
+                                style: TextStyle(color: Colors.white),
                               ),
                               onTap: () => Navigator.push(
                                 context,

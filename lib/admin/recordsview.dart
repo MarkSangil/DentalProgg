@@ -5,7 +5,6 @@ import 'package:dentalprogapplication/admin/prescription.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-// ignore: camel_case_types
 class recordsviewPage extends StatefulWidget {
   final String uid;
   final String age;
@@ -24,11 +23,9 @@ class recordsviewPage extends StatefulWidget {
   });
 
   @override
-  // ignore: library_private_types_in_public_api
   _recordsviewPage createState() => _recordsviewPage();
 }
 
-// ignore: camel_case_types
 class _recordsviewPage extends State<recordsviewPage> {
   @override
   Widget build(BuildContext context) {
@@ -37,14 +34,12 @@ class _recordsviewPage extends State<recordsviewPage> {
       home: Scaffold(
         body: Stack(
           children: [
-            // Background Image
             Image.asset(
               'asset/bg.jpg',
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
             ),
-
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: 10,
@@ -54,7 +49,7 @@ class _recordsviewPage extends State<recordsviewPage> {
                 children: [
                   const backPage(),
                   Container(
-                    margin: const EdgeInsets.only(top: 150),
+                    margin: const EdgeInsets.only(top: 10),
                     padding: const EdgeInsets.all(5),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -75,10 +70,8 @@ class _recordsviewPage extends State<recordsviewPage> {
                             ),
                           ),
                         ),
-
                         const SizedBox(
-                            width: 10), // Add some space between the containers
-
+                            width: 10),
                         const Column(
                           children: [
                             Text(
@@ -102,19 +95,14 @@ class _recordsviewPage extends State<recordsviewPage> {
                             fontWeight: FontWeight.w400,
                             color: Colors.black),
                       ),
-                      // ignore: deprecated_member_use
                       GestureDetector(
                         child: const FaIcon(
-                          // ignore: deprecated_member_use
-                          FontAwesomeIcons.fileDownload,
+                          FontAwesomeIcons.fileArrowDown,
                           color: Color(0xddD21f3C),
                         ),
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: ((context) =>
-                                      DownloadPage(uid: widget.uid))));
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: ((context) => DownloadPage(uid: widget.uid))));
                         },
                       )
                     ],
@@ -149,7 +137,7 @@ class _recordsviewPage extends State<recordsviewPage> {
                         ),
                       ),
                       const SizedBox(
-                          width: 10), // Add some space between the containers
+                          width: 10),
                       Expanded(
                         child: GestureDetector(
                           child: Container(
@@ -171,11 +159,8 @@ class _recordsviewPage extends State<recordsviewPage> {
                               ),
                             ),
                           ),
-                          onTap: () => Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: ((context) =>
-                                      historyPage(uid: widget.uid)))),
+                          onTap: () => Navigator.pushReplacement(context,
+                              MaterialPageRoute(builder: ((context) => historyPage(uid: widget.uid)))),
                         ),
                       ),
                     ],
@@ -210,7 +195,7 @@ class _recordsviewPage extends State<recordsviewPage> {
                         ),
                       ),
                       const SizedBox(
-                          width: 10), // Add some space between the containers
+                          width: 10),
                       Expanded(
                         child: GestureDetector(
                           child: Container(
@@ -232,11 +217,8 @@ class _recordsviewPage extends State<recordsviewPage> {
                               ),
                             ),
                           ),
-                          onTap: () => Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: ((context) =>
-                                      historyPage(uid: widget.uid)))),
+                          onTap: () => Navigator.pushReplacement(context,
+                              MaterialPageRoute(builder: ((context) => historyPage(uid: widget.uid)))),
                         ),
                       ),
                     ],

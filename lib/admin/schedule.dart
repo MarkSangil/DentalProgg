@@ -77,9 +77,9 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   String _convertTo24HourFormat(String time) {
-    DateFormat dateFormat = DateFormat.jm();
-    DateTime dateTime = dateFormat.parse(time);
-    return DateFormat('HH:mm:ss').format(dateTime);
+    final format = DateFormat.jm();
+    final dateTime = format.parse(time);
+    return DateFormat('HH:mm').format(dateTime);
   }
 
   void _selectDate() async {
@@ -113,7 +113,7 @@ class _SchedulePageState extends State<SchedulePage> {
     final DateTime selectedDate = DateTime.parse(dateController.text);
     final now = DateTime.now();
     final initialTime =
-        TimeOfDay.fromDateTime(selectedDate.isBefore(now) ? now : selectedDate);
+    TimeOfDay.fromDateTime(selectedDate.isBefore(now) ? now : selectedDate);
     final bookedTimes = await _getBookedTimesForDate(dateController.text);
 
     final TimeOfDay? selectedTime = await showDialog<TimeOfDay>(
@@ -215,14 +215,12 @@ class _SchedulePageState extends State<SchedulePage> {
       showAlert("Please select both date and time.");
       return;
     }
-
     String combinedDateTime = "${dateController.text} ${timeController.text}";
 
     if (await isScheduleExisting(combinedDateTime)) {
       showAlert("This schedule already exists.");
       return;
     }
-
     try {
       await FirebaseFirestore.instance.collection('schedule').add({
         'date': dateController.text,
@@ -331,27 +329,28 @@ class _SchedulePageState extends State<SchedulePage> {
                   Row(
                     children: [
                       Container(
+                        alignment: Alignment.center,
+                        width: 70,
+                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 18),
                         decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.red.withOpacity(0.5),
-                              spreadRadius: 5,
-                              blurRadius: 7,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
+                          color: const Color(0xddD21f3C),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Image.asset('asset/appointment.png',
-                            height: 50, width: 50),
+                        child: const SizedBox(
+                          child: Image(
+                            width: 100,
+                            image: AssetImage('asset/appointment.png'),
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 10),
-                      const Text(
-                        'Appointments',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
+                      const Column(
+                        children: [
+                          Text(
+                            'Appointments',
+                            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400, color: Colors.black),
+                          )
+                        ],
                       ),
                     ],
                   ),
@@ -366,15 +365,18 @@ class _SchedulePageState extends State<SchedulePage> {
                     ),
                     child: const Text('ADD SCHEDULE'),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: bookedSlots.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(bookedSlots[index]),
-                        );
-                      },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 70.0),
+                      child: ListView.builder(
+                        itemCount: bookedSlots.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(bookedSlots[index]),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ],

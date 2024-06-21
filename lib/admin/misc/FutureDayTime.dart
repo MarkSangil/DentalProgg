@@ -32,11 +32,11 @@ class _FutureDayTimePickerState extends State<FutureDayTimePicker> {
   @override
   Widget build(BuildContext context) {
     List<TimeOfDay> availableTimes = [];
-    for (int index = 0; index < 24 * 2; index++) {
-      final hour = index ~/ 2;
-      final minute = (index % 2) * 30;
-      final time = TimeOfDay(hour: hour, minute: minute);
-      availableTimes.add(time);
+    for (int hour = 7; hour <= 17; hour++) {
+      final time = TimeOfDay(hour: hour, minute: 0);
+      if (!isBooked(time)) {
+        availableTimes.add(time);
+      }
     }
 
     return AlertDialog(
@@ -46,7 +46,7 @@ class _FutureDayTimePickerState extends State<FutureDayTimePicker> {
         height: 300,
         child: GridView.builder(
           gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
           itemCount: availableTimes.length,
           itemBuilder: (context, index) {
             final time = availableTimes[index];

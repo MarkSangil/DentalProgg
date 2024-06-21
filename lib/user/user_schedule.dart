@@ -3,31 +3,33 @@ import 'package:dentalprogapplication/user/user_back.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 void main() {
-  runApp(const user_schedulePage());
+  runApp(const UserSchedulePage());
 }
 
-// ignore: camel_case_types
-class user_schedulePage extends StatefulWidget {
-  const user_schedulePage({super.key});
+class UserSchedulePage extends StatefulWidget {
+  const UserSchedulePage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _user_schedulePage createState() => _user_schedulePage();
+  _UserSchedulePageState createState() => _UserSchedulePageState();
 }
 
-// ignore: camel_case_types
-class _user_schedulePage extends State<user_schedulePage> {
+class _UserSchedulePageState extends State<UserSchedulePage> {
   final user = FirebaseAuth.instance.currentUser;
-
   String name = "";
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  DateTime _selectedDate = DateTime.now();
+  List<TimeOfDay> availableTimes = [];
+  List<TimeOfDay> scheduledTimes = [];
 
   @override
   void initState() {
     super.initState();
-    // Fetch data based on the provided UID when the widget initializes
     fetchData();
+    fetchScheduledTimes(_selectedDate);
   }
 
   Future<void> fetchData() async {
@@ -38,25 +40,118 @@ class _user_schedulePage extends State<user_schedulePage> {
             .collection('users')
             .where('uid', isEqualTo: user.uid)
             .get();
-
         if (querySnapshot.docs.isNotEmpty) {
-          var userData =
-              querySnapshot.docs.first.data() as Map<String, dynamic>?;
-
+          var userData = querySnapshot.docs.first.data() as Map<String, dynamic>?;
           if (userData != null) {
             setState(() {
               name = userData['name'] ?? '';
             });
-          } else {}
-        } else {}
-      } else {}
-      // ignore: empty_catches
-    } catch (e) {}
+          }
+        }
+      }
+    } catch (e) {
+    }
+  }
+
+  Future<void> fetchScheduledTimes(DateTime selectedDate) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('schedule')
+          .where('date', isEqualTo: DateFormat('yyyy-MM-dd').format(selectedDate))
+          .get();
+      if (querySnapshot.docs.isNotEmpty) {
+        setState(() {
+          scheduledTimes = querySnapshot.docs.map((doc) {
+            var timeString = doc['time'] as String;
+            return _convertToTimeOfDay(timeString);
+          }).toList();
+        });
+      } else {
+        setState(() {
+          scheduledTimes = [];
+        });
+      }
+      _generateAvailableTimes();
+    } catch (e) {
+    }
+  }
+
+  TimeOfDay _convertToTimeOfDay(String time) {
+    final format = DateFormat.jm();
+    return TimeOfDay.fromDateTime(format.parse(time));
+  }
+
+  Future<void> _saveAppointment(DateTime selectedDate, TimeOfDay selectedTime) async {
+    try {
+      var user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        String formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+        String formattedTime = DateFormat('h:mm a').format(
+            DateTime(selectedDate.year, selectedDate.month, selectedDate.day, selectedTime.hour, selectedTime.minute)
+        );
+
+        var scheduleDocRef = FirebaseFirestore.instance.collection('schedule').doc();
+        String scheduleUid = scheduleDocRef.id;
+
+        await scheduleDocRef.set({
+          'userId': user.uid,
+          'date': formattedDate,
+          'time': formattedTime,
+        });
+
+        await FirebaseFirestore.instance.collection('appointment').add({
+          'userId': user.uid,
+          'name': name,
+          'date': formattedDate,
+          'time': formattedTime,
+          'schedule_uid': scheduleUid,
+          'status': 'Pending',
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Appointment and schedule saved successfully!')),
+        );
+        await fetchScheduledTimes(_selectedDate); // Fetch again to update the state
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save appointment and schedule: $e')),
+      );
+    }
+  }
+
+  void _showTimePicker() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SizedBox(
+          height: 300,
+          child: ListView.builder(
+            itemCount: availableTimes.length,
+            itemBuilder: (context, index) {
+              final time = availableTimes[index];
+              return ListTile(
+                title: Text(time.format(context)),
+                onTap: () {
+                  Navigator.pop(context, time);
+                },
+              );
+            },
+          ),
+        );
+      },
+    ).then((selectedTime) {
+      if (selectedTime != null) {
+        _saveAppointment(_selectedDate, selectedTime);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final DateTime firstDayOfMonth = DateTime(_selectedDate.year, _selectedDate.month, 1);
+    final DateTime lastDayOfMonth = DateTime(_selectedDate.year, _selectedDate.month + 1, 0);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -73,30 +168,19 @@ class _user_schedulePage extends State<user_schedulePage> {
             ),
             SingleChildScrollView(
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 margin: const EdgeInsets.only(top: 10),
                 child: Column(
                   children: [
                     const user_backPage(),
                     Container(
-                      padding: const EdgeInsets.only(bottom: 20, left: 5),
+                      padding: const EdgeInsets.only(bottom: 5, left: 5),
                       child: const Row(
                         children: [
-                          FaIcon(
-                            // ignore: deprecated_member_use
-                            FontAwesomeIcons.userCircle,
-                            size: 40,
-                            color: Colors.black,
-                          ),
                           Text(
                             ' USER',
-                            style: TextStyle(
-                                fontSize: 30,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w500),
-                          )
+                            style: TextStyle(fontSize: 30, color: Colors.black, fontWeight: FontWeight.w500),
+                          ),
                         ],
                       ),
                     ),
@@ -114,33 +198,20 @@ class _user_schedulePage extends State<user_schedulePage> {
                             child: const Column(
                               children: [
                                 AspectRatio(
-                                  aspectRatio: 1.3, // Maintain aspect ratio
-                                  child: Image(
-                                    image: AssetImage('asset/appointment.png'),
-                                  ),
+                                  aspectRatio: 1.3,
+                                  child: Image(image: AssetImage('asset/appointment.png')),
                                 ),
-                                Text(
-                                  'Schedule',
-                                  style: TextStyle(color: Colors.white),
-                                )
+                                Text('Schedule', style: TextStyle(color: Colors.white)),
                               ],
                             ),
                           ),
-
-                          const SizedBox(
-                              width:
-                                  10), // Add some space between the containers
+                          const SizedBox(width: 5),
                         ],
                       ),
                     ),
                     Container(
-                      margin: const EdgeInsets.all(20),
-                    ),
-                    Container(
                       padding: const EdgeInsets.only(bottom: 20),
-                      decoration: BoxDecoration(
-                          color: const Color.fromARGB(105, 255, 52, 52),
-                          borderRadius: BorderRadius.circular(20)),
+                      decoration: BoxDecoration(color: const Color.fromARGB(105, 255, 52, 52), borderRadius: BorderRadius.circular(20)),
                       child: Column(
                         children: [
                           Container(
@@ -152,259 +223,65 @@ class _user_schedulePage extends State<user_schedulePage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                const FaIcon(
-                                  // ignore: deprecated_member_use
-                                  FontAwesomeIcons.listCheck,
-                                  size: 50,
-                                  color: Colors.white,
-                                ),
+                                const FaIcon(FontAwesomeIcons.listCheck, size: 50, color: Colors.white),
                                 Container(
-                                    alignment: Alignment.center,
-                                    padding: const EdgeInsets.all(15),
-                                    child: const Text(
-                                      'LIST OF SCHEDULE',
-                                      style: TextStyle(
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white),
-                                    )),
+                                  alignment: Alignment.center,
+                                  padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                                  child: const Text(
+                                    'LIST OF SCHEDULE',
+                                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.white),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height / 3,
-                            child: SingleChildScrollView(
-                              child: StreamBuilder<QuerySnapshot>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('schedule')
-                                    .snapshots(),
-                                builder: ((context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    final data = snapshot.data?.docs ?? [];
-
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                            child: TableCalendar(
+                              firstDay: firstDayOfMonth,
+                              lastDay: lastDayOfMonth,
+                              focusedDay: _selectedDate,
+                              calendarFormat: _calendarFormat,
+                              onFormatChanged: (format) {
+                                setState(() {
+                                  _calendarFormat = format;
+                                });
+                              },
+                              onDaySelected: (selectedDay, focusedDay) {
+                                if (!_isPastDate(selectedDay)) {
+                                  setState(() {
+                                    _selectedDate = selectedDay;
+                                  });
+                                  fetchScheduledTimes(selectedDay).then((_) {
+                                    _showTimePicker();
+                                  });
+                                }
+                              },
+                              selectedDayPredicate: (day) {
+                                return isSameDay(_selectedDate, day);
+                              },
+                              calendarBuilders: CalendarBuilders(
+                                defaultBuilder: (context, day, focusedDay) {
+                                  if (_isPastDate(day)) {
                                     return Center(
-                                      child: Table(
-                                        children: [
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                child: Container(
-                                                    alignment: Alignment.center,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(vertical: 5),
-                                                    child: const Text(
-                                                      'Date',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          color: Colors.white,
-                                                          fontSize: 20),
-                                                    )),
-                                              ),
-                                              TableCell(
-                                                child: Container(
-                                                    alignment: Alignment.center,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(vertical: 5),
-                                                    child: const Text(
-                                                      'Time',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          color: Colors.white,
-                                                          fontSize: 20),
-                                                    )),
-                                              ),
-                                              TableCell(
-                                                child: Container(
-                                                    alignment: Alignment.center,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(vertical: 5),
-                                                    child: const Text(
-                                                      'Time',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          color: Colors.white,
-                                                          fontSize: 20),
-                                                    )),
-                                              ),
-                                            ],
-                                          ),
-                                          for (var doc in data)
-                                            TableRow(
-                                              children: [
-                                                TableCell(
-                                                  child: Container(
-                                                      alignment:
-                                                          Alignment.center,
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          vertical: 5),
-                                                      child: Text(
-                                                        doc['date'] ?? '',
-                                                        style: const TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      )),
-                                                ),
-                                                TableCell(
-                                                  child: Container(
-                                                      alignment:
-                                                          Alignment.center,
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          vertical: 5),
-                                                      child: Text(
-                                                        doc['time'] ?? '',
-                                                        style: const TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      )),
-                                                ),
-                                                TableCell(
-                                                  child: Container(
-                                                    alignment: Alignment.center,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(vertical: 5),
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (BuildContext
-                                                              context) {
-                                                            return AlertDialog(
-                                                              title: const Text(
-                                                                  'You Want Set This Schedule?'),
-                                                              actions: [
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .end,
-                                                                  children: [
-                                                                    TextButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        Navigator.pop(
-                                                                            context);
-                                                                      },
-                                                                      child: const Text(
-                                                                          'Close'),
-                                                                    ),
-                                                                    TextButton(
-                                                                      style: const ButtonStyle(
-                                                                          backgroundColor:
-                                                                              WidgetStatePropertyAll(Colors.redAccent)),
-                                                                      onPressed:
-                                                                          () async {
-                                                                        QuerySnapshot querySnapshot = await FirebaseFirestore
-                                                                            .instance
-                                                                            .collection(
-                                                                                'appointment')
-                                                                            .where('schedule_uid',
-                                                                                isEqualTo: doc.id)
-                                                                            .get();
-
-                                                                        if (querySnapshot
-                                                                            .docs
-                                                                            .isNotEmpty) {
-                                                                          // ignore: use_build_context_synchronously
-                                                                          showDialog(
-                                                                            context:
-                                                                                context,
-                                                                            builder:
-                                                                                (BuildContext context) {
-                                                                              return AlertDialog(
-                                                                                title: const Text('Already Exist'),
-                                                                                actions: [
-                                                                                  Row(
-                                                                                    mainAxisAlignment: MainAxisAlignment.end,
-                                                                                    children: [
-                                                                                      TextButton(
-                                                                                        onPressed: () {
-                                                                                          Navigator.pop(context);
-                                                                                        },
-                                                                                        child: const Text('Close'),
-                                                                                      ),
-                                                                                    ],
-                                                                                  )
-                                                                                ],
-                                                                              );
-                                                                            },
-                                                                          );
-                                                                        } else {
-                                                                          FirebaseFirestore
-                                                                              .instance
-                                                                              .collection('appointment')
-                                                                              .doc()
-                                                                              .set({
-                                                                            'schedule_uid':
-                                                                                doc.id,
-                                                                            'date':
-                                                                                doc['date'],
-                                                                            'time':
-                                                                                doc['time'],
-                                                                            'user_id':
-                                                                                user!.uid,
-                                                                            'name':
-                                                                                name,
-                                                                            'status':
-                                                                                'Pending'
-                                                                          }).then((value) {
-                                                                            showDialog(
-                                                                              context: context,
-                                                                              builder: (BuildContext context) {
-                                                                                return AlertDialog(
-                                                                                  title: const Text('Successfully Set Schedule'),
-                                                                                  actions: [
-                                                                                    Row(
-                                                                                      mainAxisAlignment: MainAxisAlignment.end,
-                                                                                      children: [
-                                                                                        TextButton(
-                                                                                          onPressed: () {
-                                                                                            Navigator.pop(context);
-                                                                                          },
-                                                                                          child: const Text('Close'),
-                                                                                        ),
-                                                                                      ],
-                                                                                    )
-                                                                                  ],
-                                                                                );
-                                                                              },
-                                                                            );
-                                                                          });
-                                                                        }
-                                                                      },
-                                                                      child:
-                                                                          const Text(
-                                                                        'Save',
-                                                                        style: TextStyle(
-                                                                            color:
-                                                                                Colors.white),
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                )
-                                                              ],
-                                                            );
-                                                          },
-                                                        );
-                                                      },
-                                                      child: const FaIcon(
-                                                          FontAwesomeIcons.eye),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                        ],
+                                      child: Text(
+                                        '${day.day}',
+                                        style: const TextStyle(color: Colors.grey),
                                       ),
                                     );
                                   } else {
-                                    return const Text('NO DATA');
+                                    return Center(
+                                      child: Text(
+                                        '${day.day}',
+                                        style: const TextStyle(color: Colors.black),
+                                      ),
+                                    );
                                   }
-                                }),
+                                },
                               ),
+                              enabledDayPredicate: (day) {
+                                return !_isPastDate(day);
+                              },
                             ),
                           ),
                         ],
@@ -416,10 +293,44 @@ class _user_schedulePage extends State<user_schedulePage> {
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void _generateAvailableTimes() {
+    availableTimes.clear();
+    for (int hour = 7; hour <= 17; hour++) {
+      final time = TimeOfDay(hour: hour, minute: 0);
+      if (_selectedDate.isSameDate(DateTime.now()) && _isTimeBeforeNow(time)) {
+        continue;
+      }
+      if (!scheduledTimes.contains(time)) {
+        availableTimes.add(time);
+      }
+    }
+  }
+
+  bool _isTimeBeforeNow(TimeOfDay time) {
+    final now = TimeOfDay.now();
+    if (_selectedDate.isSameDate(DateTime.now())) {
+      if (time.hour < now.hour || (time.hour == now.hour && time.minute < now.minute)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _isPastDate(DateTime day) {
+    final today = DateTime.now();
+    return day.isBefore(DateTime(today.year, today.month, today.day));
+  }
+}
+
+extension DateHelpers on DateTime {
+  bool isSameDate(DateTime other) {
+    return year == other.year && month == other.month && day == other.day;
   }
 }
