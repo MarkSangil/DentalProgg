@@ -13,16 +13,13 @@ void main() {
   runApp(const user_welcomePage());
 }
 
-// ignore: camel_case_types
 class user_welcomePage extends StatefulWidget {
   const user_welcomePage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _user_welcomePage createState() => _user_welcomePage();
 }
 
-// ignore: camel_case_types
 class _user_welcomePage extends State<user_welcomePage> {
   @override
   Widget build(BuildContext context) {
@@ -34,7 +31,6 @@ class _user_welcomePage extends State<user_welcomePage> {
       home: Scaffold(
         body: Stack(
           children: [
-            // Background Image
             Image.asset(
               'asset/bg.jpg',
               fit: BoxFit.cover,
@@ -53,7 +49,6 @@ class _user_welcomePage extends State<user_welcomePage> {
                     child: const Row(
                       children: [
                         FaIcon(
-                          // ignore: deprecated_member_use
                           FontAwesomeIcons.userCircle,
                           size: 40,
                           color: Colors.black,
@@ -84,11 +79,10 @@ class _user_welcomePage extends State<user_welcomePage> {
                               child: Column(
                                 children: [
                                   AspectRatio(
-                                      aspectRatio: 1.3, // Maintain aspect ratio
+                                      aspectRatio: 1.3,
                                       child: Container(
                                         alignment: Alignment.center,
                                         child: const FaIcon(
-                                          // ignore: deprecated_member_use
                                           FontAwesomeIcons.solidUser,
                                           size: 100,
                                           color: Colors.white,
@@ -112,7 +106,7 @@ class _user_welcomePage extends State<user_welcomePage> {
                           ),
                         ),
                         const SizedBox(
-                            width: 10), // Add some space between the containers
+                            width: 10),
                         Expanded(
                           child: GestureDetector(
                             child: Container(
@@ -124,14 +118,14 @@ class _user_welcomePage extends State<user_welcomePage> {
                               child: const Column(
                                 children: [
                                   AspectRatio(
-                                    aspectRatio: 1.3, // Maintain aspect ratio
+                                    aspectRatio: 1.3,
                                     child: Image(
                                       image:
                                           AssetImage('asset/announcement.png'),
                                     ),
                                   ),
                                   Text(
-                                    'Annoucement',
+                                    'Announcement',
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500,
@@ -166,7 +160,7 @@ class _user_welcomePage extends State<user_welcomePage> {
                               child: const Column(
                                 children: [
                                   AspectRatio(
-                                    aspectRatio: 1.3, // Maintain aspect ratio
+                                    aspectRatio: 1.3,
                                     child: Image(
                                       image:
                                           AssetImage('asset/appointment.png'),
@@ -190,7 +184,7 @@ class _user_welcomePage extends State<user_welcomePage> {
                           ),
                         ),
                         const SizedBox(
-                            width: 10), // Add some space between the containers
+                            width: 10),
                         Expanded(
                           child: GestureDetector(
                               child: Container(
@@ -202,7 +196,7 @@ class _user_welcomePage extends State<user_welcomePage> {
                                 child: const Column(
                                   children: [
                                     AspectRatio(
-                                      aspectRatio: 1.3, // Maintain aspect ratio
+                                      aspectRatio: 1.3,
                                       child: Image(
                                         image: AssetImage('asset/message.png'),
                                       ),
@@ -247,7 +241,6 @@ class _user_welcomePage extends State<user_welcomePage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   FaIcon(
-                                    // ignore: deprecated_member_use
                                     FontAwesomeIcons.phone,
                                     size: 30,
                                     color: Colors.white,

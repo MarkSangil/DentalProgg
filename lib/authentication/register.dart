@@ -6,16 +6,13 @@ void main() {
   runApp(const registerPage());
 }
 
-// ignore: camel_case_types
 class registerPage extends StatefulWidget {
   const registerPage({Key? key}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _registerPage createState() => _registerPage();
 }
 
-// ignore: camel_case_types
 class _registerPage extends State<registerPage> {
   TextEditingController name = TextEditingController();
   TextEditingController email = TextEditingController();
@@ -28,27 +25,25 @@ class _registerPage extends State<registerPage> {
       home: Scaffold(
         body: Stack(
           children: [
-            // Background Image
             Image.asset(
               'asset/bg.jpg',
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
             ),
-            // Other widgets on top of the background image
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 0),
               child: ListView(
                 children: [
-                  // Your existing widgets here
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50, vertical: 30),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(150),
+                      borderRadius: BorderRadius.circular(75),
                       child: Image.asset(
                         'asset/logo.png',
-                        // You can add additional properties like width, height, fit, etc.
+                        width: 100,
+                        height: 100,
                       ),
                     ),
                   ),
@@ -63,7 +58,7 @@ class _registerPage extends State<registerPage> {
                         const Text(
                           'CREATE NEW ACCOUNT',
                           style: TextStyle(
-                            fontSize: 25,
+                            fontSize: 22,
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
                           ),
@@ -84,15 +79,14 @@ class _registerPage extends State<registerPage> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             image: const DecorationImage(
-                              image: AssetImage(
-                                  'asset/input1.png'), // Replace 'your_image_path_here.jpg' with your image asset path
-                              fit: BoxFit.cover, // Adjust the fit as needed
+                              image: AssetImage('asset/input1.png'),
+                              fit: BoxFit.cover,
                             ),
                           ),
                           child: TextField(
                             controller: name,
                             decoration:
-                                const InputDecoration(border: InputBorder.none),
+                            const InputDecoration(border: InputBorder.none),
                           ),
                         ),
                         Container(
@@ -111,15 +105,14 @@ class _registerPage extends State<registerPage> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             image: const DecorationImage(
-                              image: AssetImage(
-                                  'asset/input1.png'), // Replace 'your_image_path_here.jpg' with your image asset path
-                              fit: BoxFit.cover, // Adjust the fit as needed
+                              image: AssetImage('asset/input1.png'),
+                              fit: BoxFit.cover,
                             ),
                           ),
                           child: TextField(
                             controller: email,
                             decoration:
-                                const InputDecoration(border: InputBorder.none),
+                            const InputDecoration(border: InputBorder.none),
                           ),
                         ),
                         Container(
@@ -138,15 +131,14 @@ class _registerPage extends State<registerPage> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             image: const DecorationImage(
-                              image: AssetImage(
-                                  'asset/input1.png'), // Replace 'your_image_path_here.jpg' with your image asset path
-                              fit: BoxFit.cover, // Adjust the fit as needed
+                              image: AssetImage('asset/input1.png'),
+                              fit: BoxFit.cover,
                             ),
                           ),
                           child: TextField(
                             controller: password,
                             decoration:
-                                const InputDecoration(border: InputBorder.none),
+                            const InputDecoration(border: InputBorder.none),
                           ),
                         ),
                         Container(
@@ -175,7 +167,7 @@ class _registerPage extends State<registerPage> {
                                   builder: (BuildContext context) {
                                     return AlertDialog(
                                       title:
-                                          const Text('Registration Successful'),
+                                      const Text('Registration Successful'),
                                       content: const Text(
                                           'Congratulations! Your registration was successful.'),
                                       actions: [
@@ -185,7 +177,7 @@ class _registerPage extends State<registerPage> {
                                                 context,
                                                 MaterialPageRoute(
                                                     builder: ((context) =>
-                                                        const loginPage())));
+                                                    const loginPage())));
                                           },
                                           child: const Text('OK'),
                                         ),

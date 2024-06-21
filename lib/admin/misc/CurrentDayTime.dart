@@ -42,11 +42,9 @@ class _CurrentDayTimePickerState extends State<CurrentDayTimePicker> {
   @override
   Widget build(BuildContext context) {
     List<TimeOfDay> availableTimes = [];
-    for (int index = 0; index < 24 * 2; index++) {
-      final hour = index ~/ 2;
-      final minute = (index % 2) * 30;
-      final time = TimeOfDay(hour: hour, minute: minute);
-      if (!isPastTime(time)) {
+    for (int hour = 7; hour <= 17; hour++) {
+      final time = TimeOfDay(hour: hour, minute: 0);
+      if (!isPastTime(time) && !isBooked(time)) {
         availableTimes.add(time);
       }
     }
@@ -58,7 +56,7 @@ class _CurrentDayTimePickerState extends State<CurrentDayTimePicker> {
         height: 300,
         child: GridView.builder(
           gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
           itemCount: availableTimes.length,
           itemBuilder: (context, index) {
             final time = availableTimes[index];

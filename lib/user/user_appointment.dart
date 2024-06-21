@@ -9,16 +9,13 @@ void main() {
   runApp(const user_appointmentPage());
 }
 
-// ignore: camel_case_types
 class user_appointmentPage extends StatefulWidget {
   const user_appointmentPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _user_appointmentPage createState() => _user_appointmentPage();
 }
 
-// ignore: camel_case_types
 class _user_appointmentPage extends State<user_appointmentPage> {
   @override
   Widget build(BuildContext context) {
@@ -30,7 +27,6 @@ class _user_appointmentPage extends State<user_appointmentPage> {
       home: Scaffold(
         body: Stack(
           children: [
-            // Background Image
             Image.asset(
               'asset/bg.jpg',
               fit: BoxFit.cover,
@@ -51,7 +47,6 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                     child: const Row(
                       children: [
                         FaIcon(
-                          // ignore: deprecated_member_use
                           FontAwesomeIcons.userCircle,
                           size: 40,
                           color: Colors.black,
@@ -80,7 +75,7 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                           child: const Column(
                             children: [
                               AspectRatio(
-                                aspectRatio: 1.3, // Maintain aspect ratio
+                                aspectRatio: 1.3,
                                 child: Image(
                                   image: AssetImage('asset/appointment.png'),
                                 ),
@@ -92,9 +87,8 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                             ],
                           ),
                         ),
-
                         const SizedBox(
-                            width: 10), // Add some space between the containers
+                            width: 10),
                       ],
                     ),
                   ),
@@ -105,9 +99,7 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 50),
                     child: Container(
                         padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Colors.redAccent,
-                          borderRadius: BorderRadius.circular(20),
+                        decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(20),
                         ),
                         child: TextButton(
                             onPressed: () {
@@ -115,12 +107,11 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: ((context) =>
-                                          const user_schedulePage())));
+                                          const UserSchedulePage())));
                             },
                             child: const Text(
                               'SELECT SCHEDULE',
-                              style:
-                                  TextStyle(fontSize: 24, color: Colors.white),
+                              style: TextStyle(fontSize: 24, color: Colors.white),
                             ))),
                   ),
                   Container(
@@ -144,7 +135,6 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const FaIcon(
-                                // ignore: deprecated_member_use
                                 FontAwesomeIcons.listCheck,
                                 size: 40,
                                 color: Colors.white,
@@ -169,37 +159,27 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                           height: MediaQuery.of(context).size.height / 3,
                           child: SingleChildScrollView(
                             child: StreamBuilder<QuerySnapshot>(
-                              stream: FirebaseFirestore.instance
-                                  .collection('appointment')
-                                  .snapshots(),
+                              stream: FirebaseFirestore.instance.collection('appointment').snapshots(),
                               builder: ((context, snapshot) {
                                 if (snapshot.hasData) {
                                   final data = snapshot.data?.docs ?? [];
-
                                   return Container(
                                     padding: const EdgeInsets.all(5),
                                     child: Column(
                                       children: [
-                                        for (int index = 0;
-                                            index < data.length;
-                                            index++)
+                                        for (int index = 0; index < data.length; index++)
                                           Column(
                                             children: [
                                               Container(
-                                                padding:
-                                                    const EdgeInsets.all(10),
+                                                padding: const EdgeInsets.all(10),
                                                 margin: const EdgeInsets.all(3),
                                                 decoration: BoxDecoration(
-                                                    color: const Color.fromARGB(
-                                                        96, 210, 31, 61),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20)),
+                                                    color: const Color.fromARGB(96, 210, 31, 61),
+                                                    borderRadius: BorderRadius.circular(20)),
                                                 child: Column(
                                                   children: [
                                                     Container(
-                                                      alignment:
-                                                          Alignment.bottomLeft,
+                                                      alignment: Alignment.bottomLeft,
                                                       child: Row(
                                                         children: [
                                                           // Container(
@@ -231,14 +211,9 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                                                           // ),
                                                           Text(
                                                             ' ${data[index]['name']}',
-                                                            style:
-                                                                const TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w700,
-                                                              fontSize: 20,
+                                                            style: const TextStyle(
+                                                              color: Colors.white,
+                                                              fontWeight: FontWeight.w700, fontSize: 20,
                                                             ),
                                                           ),
                                                         ],

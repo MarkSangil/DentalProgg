@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dentalprogapplication/admin/message.dart';
 import 'package:dentalprogapplication/controller/controller.dart';
@@ -14,16 +13,13 @@ void main() {
   runApp(const user_profilePage());
 }
 
-// ignore: camel_case_types
 class user_profilePage extends StatefulWidget {
   const user_profilePage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _user_profilePage createState() => _user_profilePage();
 }
 
-// ignore: camel_case_types
 class _user_profilePage extends State<user_profilePage> {
   final user = FirebaseAuth.instance.currentUser;
   final TextEditingController _idController = TextEditingController();
@@ -36,21 +32,17 @@ class _user_profilePage extends State<user_profilePage> {
   final TextEditingController _birthdayController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _typeController = TextEditingController();
-  // ignore: non_constant_identifier_names
   final TextEditingController _ec_nameController = TextEditingController();
-  // ignore: non_constant_identifier_names
-  final TextEditingController _ec_contact_noController =
-      TextEditingController();
-  // ignore: non_constant_identifier_names
-  final TextEditingController _relationship_to_patientController =
-      TextEditingController();
+  final TextEditingController _ec_contact_noController = TextEditingController();
+  final TextEditingController _relationship_to_patientController = TextEditingController();
 
   String images = "";
+  XFile? image;
+  String downloadURL = "";
 
   @override
   void initState() {
     super.initState();
-    // Fetch data based on the provided UID when the widget initializes
     fetchData();
   }
 
@@ -64,39 +56,29 @@ class _user_profilePage extends State<user_profilePage> {
             .get();
 
         if (querySnapshot.docs.isNotEmpty) {
-          var userData =
-              querySnapshot.docs.first.data() as Map<String, dynamic>?;
-
-          if (userData != null) {
-            setState(() {
-              _idController.text = querySnapshot.docs.first.id;
-              _uidController.text = userData['uid'] ?? '';
-              _nameController.text = userData['name'] ?? '';
-              _emailController.text = userData['email'] ?? '';
-              _ageController.text = userData['age'] ?? '';
-              _contactController.text = userData['contact'] ?? '';
-              _genderController.text = userData['gender'] ?? '';
-              _birthdayController.text = userData['birthday'] ?? '';
-              _addressController.text = userData['address'] ?? '';
-              _typeController.text = userData['type'] ?? '';
-              _ec_nameController.text = userData['ec_name'] ?? '';
-              _ec_contact_noController.text = userData['ec_contact_no'] ?? '';
-              _relationship_to_patientController.text =
-                  userData['relationship_to_patient'] ?? '';
-              images = userData['image'] ?? '';
-
-              // Update other controllers for other fields accordingly
-            });
-          } else {}
-        } else {}
-      } else {}
-      // ignore: empty_catches
-    } catch (e) {}
+          var userData = querySnapshot.docs.first.data() as Map<String, dynamic>;
+          setState(() {
+            _idController.text = querySnapshot.docs.first.id;
+            _uidController.text = userData['uid'] ?? '';
+            _nameController.text = userData['name'] ?? '';
+            _emailController.text = userData['email'] ?? '';
+            _ageController.text = userData['age'] ?? '';
+            _contactController.text = userData['contact'] ?? '';
+            _genderController.text = userData['gender'] ?? '';
+            _birthdayController.text = userData['birthday'] ?? '';
+            _addressController.text = userData['address'] ?? '';
+            _typeController.text = userData['type'] ?? '';
+            _ec_nameController.text = userData['ec_name'] ?? '';
+            _ec_contact_noController.text = userData['ec_contact_no'] ?? '';
+            _relationship_to_patientController.text = userData['relationship_to_patient'] ?? '';
+            images = userData['image'] ?? '';
+          });
+        }
+      }
+    } catch (e) {
+      print("Error fetching data: $e");
+    }
   }
-
-  XFile? image;
-
-  String downloadURL = "";
 
   Future<void> showImage(ImageSource source) async {
     final img = await ImagePicker().pickImage(source: source);
@@ -108,27 +90,17 @@ class _user_profilePage extends State<user_profilePage> {
     }
   }
 
-  // Future<void> uploadFirebase(File imageFile) async {
-  //   var path = 'images';
-  //   var file = File(image!.path);
-  //   final ref = FirebaseStorage.instance.ref().child(path).child(image!.name);
-  //   await ref.putFile(file);
-  //   downloadURL = await ref.getDownloadURL();
-  // }
-
   Future<void> uploadFirebase(File imageFile) async {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        // Schedule the dialog to close after 3 seconds
         Future.delayed(const Duration(seconds: 3), () {
           Navigator.of(context).pop(true);
         });
-
         return const AlertDialog(
           title: Text('Waiting...'),
-          content: Text("Waiting to Upload Image to firebase"),
+          content: Text("Waiting to Upload Image to Firebase"),
         );
       },
     );
@@ -139,13 +111,29 @@ class _user_profilePage extends State<user_profilePage> {
           .child('images/${DateTime.now().toIso8601String()}.png');
       final uploadTask = storageRef.putFile(imageFile);
       await uploadTask.whenComplete(() async {
-        downloadURL = await storageRef.getDownloadURL();
+        String downloadURLTemp = await storageRef.getDownloadURL();
         setState(() {
-          print("Download URL: $downloadURL");
+          images = downloadURLTemp;
+          downloadURL = downloadURLTemp; // Update downloadURL here
         });
+        print("Image uploaded successfully, URL: $downloadURL");
+        await updateUserProfileImage(downloadURL);
       });
     } catch (e) {
       print("Error during upload: $e");
+    }
+  }
+
+  Future<void> updateUserProfileImage(String imageUrl) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'image': imageUrl,
+        });
+      }
+    } catch (e) {
+      print("Error updating Firestore: $e");
     }
   }
 
@@ -159,7 +147,6 @@ class _user_profilePage extends State<user_profilePage> {
       home: Scaffold(
         body: Stack(
           children: [
-            // Background Image
             Image.asset(
               'asset/bg.jpg',
               fit: BoxFit.cover,
@@ -167,9 +154,7 @@ class _user_profilePage extends State<user_profilePage> {
               height: double.infinity,
             ),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: ListView(
                 children: [
                   const user_backPage(),
@@ -178,8 +163,7 @@ class _user_profilePage extends State<user_profilePage> {
                     child: const Row(
                       children: [
                         FaIcon(
-                          // ignore: deprecated_member_use
-                          FontAwesomeIcons.userCircle,
+                          FontAwesomeIcons.circleUser,
                           size: 40,
                           color: Colors.black,
                         ),
@@ -191,14 +175,6 @@ class _user_profilePage extends State<user_profilePage> {
                               fontWeight: FontWeight.w500),
                         )
                       ],
-                    ),
-                  ),
-                  Visibility(
-                    visible: false,
-                    child: TextField(
-                      controller: _typeController,
-                      decoration:
-                          const InputDecoration(border: InputBorder.none),
                     ),
                   ),
                   Row(
@@ -255,20 +231,20 @@ class _user_profilePage extends State<user_profilePage> {
                             children: [
                               image != null
                                   ? Image.file(
-                                      File(image!.path),
-                                      width: 70,
-                                      height: 70,
-                                    )
-                                  : images != ''
-                                      ? Image.network(
-                                          images,
-                                          width: 70,
-                                          height: 70,
-                                        )
-                                      : const FaIcon(
-                                          FontAwesomeIcons.userCircle,
-                                          size: 70,
-                                        ),
+                                File(image!.path),
+                                width: 70,
+                                height: 70,
+                              )
+                                  : images.isNotEmpty
+                                  ? Image.network(
+                                images,
+                                width: 70,
+                                height: 70,
+                              )
+                                  : const FaIcon(
+                                FontAwesomeIcons.circleUser,
+                                size: 70,
+                              ),
                               const Text(
                                 'Profile',
                                 style: TextStyle(
@@ -317,7 +293,7 @@ class _user_profilePage extends State<user_profilePage> {
                         ),
                       ),
                       const SizedBox(
-                          width: 10), // Add some space between the containers
+                          width: 10),
                       Expanded(
                         child: GestureDetector(
                           child: Container(
@@ -392,7 +368,7 @@ class _user_profilePage extends State<user_profilePage> {
                         ),
                       ),
                       const SizedBox(
-                          width: 10), // Add some space between the containers
+                          width: 10),
                       Expanded(
                         child: Container(
                           padding: const EdgeInsets.all(10),
@@ -461,7 +437,7 @@ class _user_profilePage extends State<user_profilePage> {
                         ),
                       ),
                       const SizedBox(
-                          width: 10), // Add some space between the containers
+                          width: 10),
                       Expanded(
                         child: Container(
                           padding: const EdgeInsets.all(15),
@@ -579,7 +555,7 @@ class _user_profilePage extends State<user_profilePage> {
                           child: TextField(
                             controller: _relationship_to_patientController,
                             decoration:
-                                const InputDecoration(border: InputBorder.none),
+                            const InputDecoration(border: InputBorder.none),
                           ),
                         ),
                       ],
@@ -593,7 +569,11 @@ class _user_profilePage extends State<user_profilePage> {
                       ),
                       child: SizedBox(
                         child: TextButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            // Make sure downloadURL is up-to-date before saving
+                            if (image != null && downloadURL.isNotEmpty) {
+                              await updateUserProfileImage(downloadURL);
+                            }
                             Controller().Profile(
                                 _uidController.text,
                                 _nameController.text,
@@ -606,8 +586,7 @@ class _user_profilePage extends State<user_profilePage> {
                                 _ec_nameController.text,
                                 _ec_contact_noController.text,
                                 _relationship_to_patientController.text,
-                                downloadURL);
-
+                                downloadURL); // Pass the updated downloadURL
                             String errorMessage = 'Successfully Update Profile';
                             showDialog(
                               context: context,
@@ -618,8 +597,7 @@ class _user_profilePage extends State<user_profilePage> {
                                   actions: [
                                     TextButton(
                                       onPressed: () {
-                                        Navigator.of(context)
-                                            .pop(); // Close the dialog
+                                        Navigator.of(context).pop();
                                       },
                                       child: const Text('OK'),
                                     ),

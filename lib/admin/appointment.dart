@@ -47,9 +47,8 @@ class _appointmentPage extends State<appointmentPage> {
                         children: [
                           Container(
                             alignment: Alignment.center,
-                            width: 50,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 18),
+                            width: 100,
+                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 18),
                             decoration: BoxDecoration(
                               color: const Color(0xddD21f3C),
                               borderRadius: BorderRadius.circular(20),
@@ -66,10 +65,7 @@ class _appointmentPage extends State<appointmentPage> {
                             children: [
                               Text(
                                 'Appointments',
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.black),
+                                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400, color: Colors.black),
                               )
                             ],
                           ),
@@ -94,8 +90,7 @@ class _appointmentPage extends State<appointmentPage> {
                             },
                             child: const Text(
                               'ADD SCHEDULE',
-                              style:
-                                  TextStyle(fontSize: 24, color: Colors.white),
+                              style: TextStyle(fontSize: 24, color: Colors.white),
                             ))),
                     Container(
                       margin: const EdgeInsets.all(10),
@@ -155,32 +150,19 @@ class _appointmentPage extends State<appointmentPage> {
                                               children: [
                                                 TableCell(
                                                   child: Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 10),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10),
                                                     child: Container(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 5,
-                                                          vertical: 14),
+                                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 14),
                                                       decoration: BoxDecoration(
-                                                          color: const Color(
-                                                              0xddD21f3C),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20)),
+                                                          color: const Color(0xddD21f3C),
+                                                          borderRadius: BorderRadius.circular(20)),
                                                       child: const Column(
                                                         children: [
                                                           Text(
                                                             'NAME',
                                                             style: TextStyle(
                                                                 fontSize: 15,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                color: Colors
-                                                                    .white),
+                                                                fontWeight: FontWeight.w600, color: Colors.white),
                                                           )
                                                         ],
                                                       ),
@@ -189,32 +171,20 @@ class _appointmentPage extends State<appointmentPage> {
                                                 ),
                                                 TableCell(
                                                   child: Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 10),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10),
                                                     child: Container(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 5,
-                                                          vertical: 14),
+                                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 14),
                                                       decoration: BoxDecoration(
-                                                          color: const Color(
-                                                              0xddD21f3C),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20)),
+                                                          color: const Color(0xddD21f3C),
+                                                          borderRadius: BorderRadius.circular(20)),
                                                       child: const Column(
                                                         children: [
                                                           Text(
                                                             'DATE',
                                                             style: TextStyle(
                                                                 fontSize: 15,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                color: Colors
-                                                                    .white),
+                                                                fontWeight: FontWeight.w600,
+                                                                color: Colors.white),
                                                           )
                                                         ],
                                                       ),
@@ -223,32 +193,17 @@ class _appointmentPage extends State<appointmentPage> {
                                                 ),
                                                 TableCell(
                                                   child: Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 10),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10),
                                                     child: Container(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 5,
-                                                          vertical: 14),
+                                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 14),
                                                       decoration: BoxDecoration(
-                                                          color: const Color(
-                                                              0xddD21f3C),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20)),
+                                                          color: const Color(0xddD21f3C),
+                                                          borderRadius: BorderRadius.circular(20)),
                                                       child: const Column(
                                                         children: [
                                                           Text(
                                                             'TIME',
-                                                            style: TextStyle(
-                                                                fontSize: 15,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                color: Colors
-                                                                    .white),
+                                                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
                                                           )
                                                         ],
                                                       ),
@@ -257,32 +212,17 @@ class _appointmentPage extends State<appointmentPage> {
                                                 ),
                                                 TableCell(
                                                   child: Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 10),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10),
                                                     child: Container(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 5,
-                                                          vertical: 14),
+                                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 14),
                                                       decoration: BoxDecoration(
-                                                          color: const Color(
-                                                              0xddD21f3C),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20)),
+                                                          color: const Color(0xddD21f3C),
+                                                          borderRadius: BorderRadius.circular(20)),
                                                       child: const Column(
                                                         children: [
                                                           Text(
                                                             'Action',
-                                                            style: TextStyle(
-                                                                fontSize: 15,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                color: Colors
-                                                                    .white),
+                                                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
                                                           )
                                                         ],
                                                       ),
@@ -299,31 +239,19 @@ class _appointmentPage extends State<appointmentPage> {
                                                         alignment:
                                                             Alignment.center,
                                                         padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                vertical: 15),
+                                                            const EdgeInsets.symmetric(vertical: 15),
                                                         child: Text(
                                                           doc['name'] ?? '',
-                                                          style:
-                                                              const TextStyle(
-                                                                  color: Colors
-                                                                      .white),
+                                                          style: const TextStyle(color: Colors.white),
                                                         )),
                                                   ),
                                                   TableCell(
                                                     child: Container(
-                                                        alignment:
-                                                            Alignment.center,
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                vertical: 15),
+                                                        alignment: Alignment.center,
+                                                        padding: const EdgeInsets.symmetric(vertical: 15),
                                                         child: Text(
                                                           doc['date'] ?? '',
-                                                          style:
-                                                              const TextStyle(
-                                                                  color: Colors
-                                                                      .white),
+                                                          style: const TextStyle(color: Colors.white),
                                                         )),
                                                   ),
                                                   TableCell(
@@ -331,35 +259,21 @@ class _appointmentPage extends State<appointmentPage> {
                                                         alignment:
                                                             Alignment.center,
                                                         padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                vertical: 15),
+                                                        const EdgeInsets.symmetric(vertical: 15),
                                                         child: Text(
                                                           doc['time'] ?? '',
-                                                          style:
-                                                              const TextStyle(
-                                                                  color: Colors
-                                                                      .white),
+                                                          style: const TextStyle(color: Colors.white),
                                                         )),
                                                   ),
                                                   TableCell(
                                                     child: Container(
-                                                        alignment:
-                                                            Alignment.center,
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                vertical: 2),
+                                                        alignment: Alignment.center,
+                                                        padding: const EdgeInsets.symmetric(vertical: 2),
                                                         child: Container(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(5),
+                                                          padding: const EdgeInsets.all(5),
                                                           height: 40,
                                                           decoration: BoxDecoration(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          20)),
+                                                              borderRadius: BorderRadius.circular(20)),
                                                           child: doc['status'] ==
                                                                   'Pending'
                                                               ? TextButton(
@@ -376,22 +290,14 @@ class _appointmentPage extends State<appointmentPage> {
                                                                   child:
                                                                       const Text(
                                                                     'Payment',
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            12,
-                                                                        color: Colors
-                                                                            .blue),
+                                                                    style: TextStyle(fontSize: 12, color: Colors.blue),
                                                                   ))
                                                               : const TextButton(
                                                                   onPressed:
                                                                       null,
                                                                   child: Text(
                                                                     'Completed',
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            12,
-                                                                        color: Colors
-                                                                            .grey),
+                                                                    style: TextStyle(fontSize: 12, color: Colors.grey),
                                                                   )),
                                                         )),
                                                   ),
