@@ -106,7 +106,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                   child: const Row(
                     children: [
                       FaIcon(
-                        FontAwesomeIcons.userCircle,
+                        FontAwesomeIcons.circleUser,
                         size: 40,
                         color: Colors.black,
                       ),

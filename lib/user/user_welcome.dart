@@ -128,7 +128,7 @@ class _user_welcomePageState extends State<user_welcomePage> {
                       Row(
                         children: [
                           FaIcon(
-                            FontAwesomeIcons.userCircle,
+                            FontAwesomeIcons.circleUser,
                             size: 40,
                             color: Colors.black,
                           ),
