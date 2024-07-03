@@ -1,9 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dentalprogapplication/admin/recordsview.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:dentalprogapplication/admin/recordsview.dart'; // Adjust the import to your actual path
 
-void main() {
-  runApp(const RecordsPage());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: RecordsPage(),
+    );
+  }
 }
 
 class RecordsPage extends StatefulWidget {
@@ -14,86 +29,154 @@ class RecordsPage extends StatefulWidget {
 }
 
 class _RecordsPageState extends State<RecordsPage> {
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _searchResults = [];
+
+  void _searchUsers(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        _searchResults = [];
+      });
+      return;
+    }
+
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('name', isGreaterThanOrEqualTo: query)
+        .where('name', isLessThanOrEqualTo: '$query\uf8ff')
+        .get();
+
+    setState(() {
+      _searchResults = snapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .where((data) => data['type'] != 'admin') // Filter out admin users
+          .toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.of(context).pop(),
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'asset/bg.jpg',
+              fit: BoxFit.cover,
+            ),
           ),
-          title: Text('Records',
-              style:
-                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.search, color: Colors.black),
-              onPressed: () {},
-            )
-          ],
-        ),
-        body: Container(
-          padding: EdgeInsets.all(8.0),
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('users')
-                .where('type', isEqualTo: 'customer')
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    headingRowColor: MaterialStateColor.resolveWith(
-                        (states) => Colors.pink.shade200),
-                    dataRowColor: MaterialStateColor.resolveWith(
-                        (states) => Colors.white),
-                    columns: const [
-                      DataColumn(
-                          label: Text('Name',
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(
-                          label: Text('Details',
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                    ],
-                    rows: snapshot.data!.docs
-                        .map<DataRow>((DocumentSnapshot document) {
-                      return DataRow(cells: [
-                        DataCell(Text(document['name'])),
-                        DataCell(IconButton(
-                          icon: Icon(Icons.info_outline),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => recordsviewPage(
-                                  uid: document['uid'],
-                                  age: document['age'],
-                                  address: document['address'],
-                                  gender: document['gender'],
-                                  contact: document['contact'],
-                                  name: document['name'],
-                                ),
-                              ),
-                            );
-                          },
-                        )),
-                      ]);
-                    }).toList(),
+          Column(
+            children: [
+              AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leadingWidth: 100,
+                leading: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    const Text(
+                      'Back',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset(
+                        'asset/records.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                );
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                return CircularProgressIndicator();
-              }
-            },
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Records',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: 'Search',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    ),
+                  ),
+                  onChanged: (query) {
+                    _searchUsers(query);
+                  },
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: _searchResults.length,
+                  itemBuilder: (context, index) {
+                    final user = _searchResults[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => recordsviewPage(
+                                uid: user['uid'],
+                                age: user['age'],
+                                address: user['address'],
+                                gender: user['gender'],
+                                contact: user['contact'],
+                                name: user['name'],
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Text(
+                            user['name'] ?? 'No name',
+                            style: const TextStyle(fontSize: 16.0),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ),
+        ],
       ),
     );
   }

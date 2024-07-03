@@ -379,7 +379,7 @@ class _user_prescriptionPage extends State<user_prescriptionPage> {
                               const SizedBox(
                                 child: Image(
                                     width: 200,
-                                    image: AssetImage('asset/sinature.png')),
+                                    image: AssetImage('asset/signature.png')),
                               ),
                               Container(
                                 width: 200,

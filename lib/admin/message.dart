@@ -10,16 +10,13 @@ void main() {
   runApp(const messagePage());
 }
 
-// ignore: camel_case_types
 class messagePage extends StatefulWidget {
   const messagePage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _messagePage createState() => _messagePage();
 }
 
-// ignore: camel_case_types
 class _messagePage extends State<messagePage> {
   final TextEditingController searchController = TextEditingController();
   @override
@@ -66,11 +63,7 @@ class _messagePage extends State<messagePage> {
                               ),
                             ),
                           ),
-
-                          const SizedBox(
-                              width:
-                                  10), // Add some space between the containers
-
+                          const SizedBox(width: 10),
                           const Column(
                             children: [
                               Text(
@@ -112,13 +105,11 @@ class _messagePage extends State<messagePage> {
                                 Expanded(
                                   child: Container(
                                     height: 40,
-
                                     decoration: BoxDecoration(
                                       color: const Color(0xddD21f3C),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
-                                    alignment: Alignment
-                                        .center, // Center the content horizontally
+                                    alignment: Alignment.center,
                                     child: TextField(
                                       controller: searchController,
                                       decoration: const InputDecoration(
@@ -134,19 +125,14 @@ class _messagePage extends State<messagePage> {
                                 ),
                                 GestureDetector(
                                   child: const FaIcon(
-                                    // ignore: deprecated_member_use
                                     FontAwesomeIcons.search,
                                     size: 30,
                                     color: Colors.white,
                                   ),
                                   onTap: () {
-                                    Navigator.push(
-                                      context,
+                                    Navigator.push(context,
                                       MaterialPageRoute(
-                                          builder: ((context) =>
-                                              messagesearchPage(
-                                                  searchtext:
-                                                      searchController.text))),
+                                          builder: ((context) => messagesearchPage(searchtext: searchController.text))),
                                     );
                                   },
                                 ),
@@ -174,45 +160,27 @@ class _messagePage extends State<messagePage> {
                                                 GestureDetector(
                                                     child: Container(
                                                       margin:
-                                                          const EdgeInsets.all(
-                                                              5),
+                                                          const EdgeInsets.all(5),
                                                       decoration: BoxDecoration(
-                                                          color: const Color
-                                                              .fromARGB(
-                                                              84, 165, 20, 20),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20)),
+                                                          color: const Color.fromARGB(84, 165, 20, 20),
+                                                          borderRadius: BorderRadius.circular(20)),
                                                       child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
+                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                         children: [
                                                           Row(
                                                             children: [
                                                               Container(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .all(5),
-                                                                decoration: BoxDecoration(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            50)),
+                                                                padding: const EdgeInsets.all(5),
+                                                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
                                                                 child: Column(
                                                                   children: [
                                                                     SizedBox(
                                                                       width: 40,
-                                                                      height:
-                                                                          40,
-                                                                      child:
-                                                                          ClipRRect(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(50),
-                                                                        child: doc['image'] ==
-                                                                                ''
+                                                                      height: 40,
+                                                                      child: ClipRRect(
+                                                                        borderRadius: BorderRadius.circular(50),
+                                                                        child: doc['image'] == ''
                                                                             ? const FaIcon(
-                                                                                // ignore: deprecated_member_use
                                                                                 FontAwesomeIcons.userCircle,
                                                                                 size: 40,
                                                                               )
@@ -226,19 +194,11 @@ class _messagePage extends State<messagePage> {
                                                                   ],
                                                                 ),
                                                               ),
-                                                              Expanded(
-                                                                child:
+                                                              Expanded(child:
                                                                     Container(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                          .all(
-                                                                          15),
-                                                                  child: Text(
-                                                                    doc['name'] ??
-                                                                        '',
-                                                                    style: const TextStyle(
-                                                                        color: Colors
-                                                                            .white),
+                                                                  padding: const EdgeInsets.all(15),
+                                                                  child: Text(doc['name'] ?? '',
+                                                                    style: const TextStyle(color: Colors.white),
                                                                   ),
                                                                 ),
                                                               )
@@ -247,14 +207,9 @@ class _messagePage extends State<messagePage> {
                                                         ],
                                                       ),
                                                     ),
-                                                    onTap: () => Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: ((context) =>
-                                                                  viewmessagePage(
-                                                                      data: firebaseDBModel(
-                                                                          uid: doc[
-                                                                              'uid'])))),
+                                                    onTap: () => Navigator.push(context,
+                                                          MaterialPageRoute(builder: ((context) => viewmessagePage(
+                                                                      data: firebaseDBModel(uid: doc['uid'])))),
                                                         ))
                                               ],
                                             ),

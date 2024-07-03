@@ -40,25 +40,27 @@ class _welcomePage extends State<welcomePage> {
                 children: [
                   const topPage(),
                   _buildButtonRow(
-                      context,
-                      'asset/records.png',
-                      'Record',
-                      const RecordsPage(),
-                      'asset/announcement.png',
-                      'Announcement',
-                      const announcementPage()),
+                    context,
+                    'asset/records.png',
+                    'Record',
+                    const RecordsPage(),
+                    'asset/announcement.png',
+                    'Announcement',
+                    const announcementPage(),
+                  ),
                   _buildButtonRow(
-                      context,
-                      'asset/appointment.png',
-                      'Appointment',
-                      const appointmentPage(),
-                      'asset/message.png',
-                      'Message',
-                      const messagePage()),
+                    context,
+                    'asset/appointment.png',
+                    'Appointment',
+                    const appointmentPage(),
+                    'asset/message.png',
+                    'Message',
+                    const messagePage(),
+                  ),
                   _logoutButton(context),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -91,7 +93,7 @@ class _welcomePage extends State<welcomePage> {
       onTap: () => Navigator.push(
           context, MaterialPageRoute(builder: (context) => nextPage)),
       child: Container(
-        height: 180, // Fixed height for all buttons
+        height: MediaQuery.of(context).size.height * 0.22, // Adjust height as needed
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
           color: const Color(0xddD21f3C),
@@ -106,12 +108,18 @@ class _welcomePage extends State<welcomePage> {
                 image: AssetImage(assetName),
               ),
             ),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+            const SizedBox(height: 5), // Adjust the space between image and text
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ],

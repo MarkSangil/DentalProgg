@@ -1,16 +1,16 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:flutter/services.dart';
 
 class DownloadViewPage extends StatefulWidget {
   final String uid;
-  const DownloadViewPage({super.key, required this.uid});
+  const DownloadViewPage({Key? key, required this.uid}) : super(key: key);
 
   @override
   _DownloadViewPageState createState() => _DownloadViewPageState();
@@ -21,21 +21,11 @@ class _DownloadViewPageState extends State<DownloadViewPage> {
   String? pdfPath;
   Uint8List? pdfBytes;
   String? tempPath;
-  Uint8List? signatureImageBytes;
 
-  Future<void> _fetchSignatureImage() async {
-    try {
-      final ref = FirebaseStorage.instance.ref().child('signatures/${widget.uid}.png');
-      final data = await ref.getData();
-      if (data != null) {
-        setState(() {
-          signatureImageBytes = data;
-          _generatePDF();
-        });
-      }
-    } catch (e) {
-      print('Error fetching signature image: $e');
-    }
+  @override
+  void initState() {
+    super.initState();
+    _generatePDF();
   }
 
   Future<void> _generatePDF() async {
@@ -47,8 +37,7 @@ class _DownloadViewPageState extends State<DownloadViewPage> {
         .get();
     final List<DocumentSnapshot> userDocuments = userQuerySnapshot.docs;
 
-    final Uint8List logoData =
-    (await rootBundle.load('asset/logo.png')).buffer.asUint8List();
+    final Uint8List logoData = (await rootBundle.load('asset/logo.png')).buffer.asUint8List();
     final pw.MemoryImage logoImage = pw.MemoryImage(logoData);
 
     for (var userDoc in userDocuments) {
@@ -73,10 +62,6 @@ class _DownloadViewPageState extends State<DownloadViewPage> {
         for (var historyDoc in historyDocuments)
           [historyDoc['selectedDentalServices']],
       ];
-
-      final pw.MemoryImage? signatureImage = signatureImageBytes != null
-          ? pw.MemoryImage(signatureImageBytes!)
-          : null;
 
       pdf.addPage(
         pw.Page(
@@ -113,14 +98,6 @@ class _DownloadViewPageState extends State<DownloadViewPage> {
                 ),
                 pw.SizedBox(height: 20),
                 pw.Text('Signature', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-                pw.UrlLink(
-                  destination: 'https://your-upload-link',
-                  child: pw.Text('Upload Photo', style: pw.TextStyle(decoration: pw.TextDecoration.underline)),
-                ),
-                if (signatureImage != null) ...[
-                  pw.SizedBox(height: 20),
-                  pw.Image(signatureImage),
-                ],
               ],
             );
           },
@@ -164,24 +141,22 @@ class _DownloadViewPageState extends State<DownloadViewPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               pdfBytes != null && tempPath != null && tempPath!.isNotEmpty
-                  ? PDFView(
-                filePath: tempPath!,
-                enableSwipe: true,
-                swipeHorizontal: true,
-                autoSpacing: false,
-                pageFling: false,
-                pageSnap: false,
-                defaultPage: 0,
-                fitPolicy: FitPolicy.BOTH,
-                preventLinkNavigation: false,
-                onRender: (_) {},
-                onError: (error) {
-                  print(error.toString());
-                },
-                onPageError: (page, error) {
-                  print('$page: ${error.toString()}');
-                },
-                onViewCreated: (PDFViewController controller) {},
+                  ? Expanded(
+                child: PDFView(
+                  filePath: tempPath!,
+                  enableSwipe: true,
+                  swipeHorizontal: true,
+                  autoSpacing: false,
+                  pageFling: false,
+                  pageSnap: false,
+                  defaultPage: 0,
+                  fitPolicy: FitPolicy.BOTH,
+                  preventLinkNavigation: false,
+                  onRender: (_) {},
+                  onError: (error) {},
+                  onPageError: (page, error) {},
+                  onViewCreated: (PDFViewController controller) {},
+                ),
               )
                   : ElevatedButton(
                 onPressed: _generatePDF,
