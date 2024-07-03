@@ -23,12 +23,12 @@ class AnnouncementHelper {
 
 class user_announcementPage extends StatefulWidget {
   final Function(String) markAsRead;
-  final Function() onAnnouncementRead; // New callback
+  final Function() onAnnouncementRead;
 
   const user_announcementPage({
     Key? key,
     required this.markAsRead,
-    required this.onAnnouncementRead, // Initialize callback
+    required this.onAnnouncementRead,
   }) : super(key: key);
 
   @override
@@ -64,7 +64,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
     });
 
     widget.markAsRead(id);
-    widget.onAnnouncementRead(); // Notify parent to refresh state
+    widget.onAnnouncementRead();
 
     showDialog(
       context: context,
@@ -124,32 +124,32 @@ class _user_announcementPageState extends State<user_announcementPage> {
                 Column(
                   children: [
                     Container(
-                      width: 150, // Adjust the width as needed
+                      width: 150,
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: const Color(0xddD21f3C),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center, // Center align content vertically
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            height: 70, // Adjust height for the AspectRatio container
+                            height: 70,
                             child: AspectRatio(
                               aspectRatio: 1.3,
                               child: Image(
                                 image: AssetImage('asset/announcement.png'),
-                                fit: BoxFit.contain, // Ensure the image fits within the AspectRatio
+                                fit: BoxFit.contain,
                               ),
                             ),
                           ),
-                          SizedBox(height: 5), // Add some spacing between image and text
+                          SizedBox(height: 5),
                           Text(
                             'Announcement',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 16, // Adjust font size as needed
-                              fontWeight: FontWeight.bold, // Adjust font weight as needed
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],

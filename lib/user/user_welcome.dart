@@ -22,7 +22,7 @@ class user_welcomePage extends StatefulWidget {
 
 class _user_welcomePageState extends State<user_welcomePage> {
   Set<String> clickedAnnouncements = Set<String>();
-  bool hasUnreadAnnouncements = false;
+  bool hasUnreadAnnouncements = true;
   String unreadAnnouncementTitle = '';
 
   @override
@@ -74,7 +74,7 @@ class _user_welcomePageState extends State<user_welcomePage> {
     await AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
   }
 
-  Future<void> _showNotification(String title) async {
+  NotificationDetails getDefaultNotificationDetails(String title) {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
     AndroidNotificationDetails(
       'your_channel_id',
@@ -86,14 +86,19 @@ class _user_welcomePageState extends State<user_welcomePage> {
     );
     const NotificationDetails platformChannelSpecifics =
     NotificationDetails(android: androidPlatformChannelSpecifics);
+    return platformChannelSpecifics;
+  }
+
+  Future<void> _showNotification(String title) async {
+    NotificationDetails defaultNotificationDetails = getDefaultNotificationDetails(title);
     await flutterLocalNotificationsPlugin.show(
       0,
-      'New Announcement',
       title,
-      platformChannelSpecifics,
+      'New Announcement',
+      defaultNotificationDetails,
       payload: 'item x',
     );
-    debugPrint('Notification Shown');
+    print('Notification Shown with title: $title');
   }
 
   void _refreshAnnouncements() {
