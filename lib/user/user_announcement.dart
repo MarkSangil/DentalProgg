@@ -15,7 +15,7 @@ class AnnouncementHelper {
   }
 
   static Future<bool> checkUnreadAnnouncements(Set<String> clickedAnnouncements) async {
-    final snapshot = await FirebaseFirestore.instance.collection('announcement').get();
+    final snapshot = await FirebaseFirestore.instance.collection('announcements').get();
     final data = snapshot.docs;
     return data.any((doc) => !clickedAnnouncements.contains(doc.id));
   }
@@ -55,6 +55,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
     setState(() {
       hasUnreadAnnouncements = unread;
     });
+    print('Announcement page - hasUnreadAnnouncements: $hasUnreadAnnouncements');
   }
 
   void _showAnnouncementDialog(BuildContext context, String id, String title, String description) {
