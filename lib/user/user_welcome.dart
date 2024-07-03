@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -22,7 +23,7 @@ class user_welcomePage extends StatefulWidget {
 
 class _user_welcomePageState extends State<user_welcomePage> {
   Set<String> clickedAnnouncements = Set<String>();
-  bool hasUnreadAnnouncements = true;
+  bool hasUnreadAnnouncements = false;
   String unreadAnnouncementTitle = '';
 
   @override
@@ -40,7 +41,21 @@ class _user_welcomePageState extends State<user_welcomePage> {
       android: initializationSettingsAndroid,
     );
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: _onDidReceiveNotificationResponse,
+    );
+
+    if (Platform.isIOS) {
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    }
   }
 
   Future<void> _loadAnnouncementData() async {
@@ -49,7 +64,7 @@ class _user_welcomePageState extends State<user_welcomePage> {
   }
 
   Future<void> _checkUnreadAnnouncements() async {
-    var querySnapshot = await FirebaseFirestore.instance.collection('announcements').get();
+    var querySnapshot = await FirebaseFirestore.instance.collection('announcement').get();
     bool unread = false;
     String title = '';
 
@@ -64,10 +79,11 @@ class _user_welcomePageState extends State<user_welcomePage> {
     setState(() {
       hasUnreadAnnouncements = unread;
       unreadAnnouncementTitle = title;
-      if (unread) {
-        _showNotification(title);
-      }
     });
+
+    if (unread) {
+      _showNotification(title);
+    }
   }
 
   Future<void> _saveClickedAnnouncements() async {
@@ -93,12 +109,16 @@ class _user_welcomePageState extends State<user_welcomePage> {
     NotificationDetails defaultNotificationDetails = getDefaultNotificationDetails(title);
     await flutterLocalNotificationsPlugin.show(
       0,
-      title,
       'New Announcement',
+      title,
       defaultNotificationDetails,
       payload: 'item x',
     );
-    print('Notification Shown with title: $title');
+  }
+
+  void _onDidReceiveNotificationResponse(NotificationResponse notificationResponse) {
+    if (notificationResponse.payload != null) {
+    }
   }
 
   void _refreshAnnouncements() {
@@ -128,7 +148,7 @@ class _user_welcomePageState extends State<user_welcomePage> {
                       Row(
                         children: [
                           FaIcon(
-                            FontAwesomeIcons.circleUser,
+                            FontAwesomeIcons.userCircle,
                             size: 40,
                             color: Colors.black,
                           ),
@@ -207,12 +227,13 @@ class _user_welcomePageState extends State<user_welcomePage> {
                                     setState(() {
                                       clickedAnnouncements.add(id);
                                       _saveClickedAnnouncements();
+                                      _checkUnreadAnnouncements();
                                     });
                                   },
                                   onAnnouncementRead: _refreshAnnouncements,
                                 ),
                               ),
-                            );
+                            ).then((_) => _refreshAnnouncements());
                           },
                           child: Stack(
                             alignment: Alignment.center,
@@ -418,7 +439,7 @@ class AnnouncementHelper {
   }
 
   static Future<bool> checkUnreadAnnouncements(Set<String> clickedAnnouncements) async {
-    var querySnapshot = await FirebaseFirestore.instance.collection('announcements').get();
+    var querySnapshot = await FirebaseFirestore.instance.collection('announcement').get();
     for (var doc in querySnapshot.docs) {
       if (!clickedAnnouncements.contains(doc.id)) {
         return true;
