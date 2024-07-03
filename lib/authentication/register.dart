@@ -17,8 +17,12 @@ class _registerPage extends State<registerPage> {
   TextEditingController name = TextEditingController();
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
+  bool _obscureText = true;
+
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+
     return MaterialApp(
       theme: ThemeData(fontFamily: "Poppins"),
       debugShowCheckedModeBanner: false,
@@ -32,18 +36,17 @@ class _registerPage extends State<registerPage> {
               height: double.infinity,
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 0),
+              padding: EdgeInsets.symmetric(horizontal: mediaQuery.size.width * 0.1),
               child: ListView(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 30),
+                    padding: EdgeInsets.symmetric(vertical: mediaQuery.size.height * 0.03),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(75),
                       child: Image.asset(
                         'asset/logo.png',
-                        width: 100,
-                        height: 100,
+                        width: mediaQuery.size.width * 0.3,
+                        height: mediaQuery.size.width * 0.3,
                       ),
                     ),
                   ),
@@ -63,9 +66,7 @@ class _registerPage extends State<registerPage> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        Container(
-                          margin: const EdgeInsets.all(5),
-                        ),
+                        SizedBox(height: mediaQuery.size.height * 0.02),
                         Container(
                           alignment: Alignment.centerLeft,
                           child: const Text(
@@ -85,13 +86,10 @@ class _registerPage extends State<registerPage> {
                           ),
                           child: TextField(
                             controller: name,
-                            decoration:
-                            const InputDecoration(border: InputBorder.none),
+                            decoration: const InputDecoration(border: InputBorder.none),
                           ),
                         ),
-                        Container(
-                          margin: const EdgeInsets.all(5),
-                        ),
+                        SizedBox(height: mediaQuery.size.height * 0.02),
                         Container(
                           alignment: Alignment.centerLeft,
                           child: const Text(
@@ -111,13 +109,10 @@ class _registerPage extends State<registerPage> {
                           ),
                           child: TextField(
                             controller: email,
-                            decoration:
-                            const InputDecoration(border: InputBorder.none),
+                            decoration: const InputDecoration(border: InputBorder.none),
                           ),
                         ),
-                        Container(
-                          margin: const EdgeInsets.all(10),
-                        ),
+                        SizedBox(height: mediaQuery.size.height * 0.02),
                         Container(
                           alignment: Alignment.centerLeft,
                           child: const Text(
@@ -137,59 +132,114 @@ class _registerPage extends State<registerPage> {
                           ),
                           child: TextField(
                             controller: password,
-                            decoration:
-                            const InputDecoration(border: InputBorder.none),
+                            obscureText: _obscureText,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureText ? Icons.visibility : Icons.visibility_off,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscureText = !_obscureText;
+                                  });
+                                },
+                              ),
+                            ),
                           ),
                         ),
+                        SizedBox(height: mediaQuery.size.height * 0.02),
                         Container(
-                          margin: const EdgeInsets.all(10),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 5),
-                          height: 45,
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          height: mediaQuery.size.height * 0.06,
+                          padding: EdgeInsets.symmetric(horizontal: mediaQuery.size.width * 0.15),
                           decoration: BoxDecoration(
                               color: const Color.fromARGB(255, 15, 5, 93),
                               borderRadius: BorderRadius.circular(20)),
-                          child: TextButton(
-                              child: const Text(
-                                'REGISTER',
-                                style: TextStyle(color: Colors.white),
+                          child: Center(
+                            child: TextButton(
+                              child: const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  'REGISTER',
+                                  style: TextStyle(color: Colors.white, fontSize: 18),
+                                ),
                               ),
                               onPressed: () {
-                                Controller().Register(
-                                  name.text,
-                                  email.text,
-                                  password.text,
-                                );
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title:
-                                      const Text('Registration Successful'),
-                                      content: const Text(
-                                          'Congratulations! Your registration was successful.'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: ((context) =>
-                                                    const loginPage())));
-                                          },
-                                          child: const Text('OK'),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              }),
+                                if (name.text.isEmpty || email.text.isEmpty || password.text.isEmpty) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Error'),
+                                        content: const Text('Please fill in all fields.'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: const Text('OK'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                } else {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Confirm Registration'),
+                                        content: const Text('Are you sure you want to register with the provided details?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                              Controller().Register(
+                                                name.text,
+                                                email.text,
+                                                password.text,
+                                              );
+                                              showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: const Text('Registration Successful'),
+                                                    content: const Text('Congratulations! Your registration was successful.'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder: ((context) => const loginPage()),
+                                                            ),
+                                                          );
+                                                        },
+                                                        child: const Text('OK'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            },
+                                            child: const Text('Confirm'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                            ),
+                          ),
                         ),
-                        Container(
-                          margin: const EdgeInsets.all(10),
-                        ),
+                        SizedBox(height: mediaQuery.size.height * 0.02),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

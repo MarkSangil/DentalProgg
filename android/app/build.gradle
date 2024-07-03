@@ -7,8 +7,8 @@ plugins {
 
 android {
     namespace "com.example.dentalprogapplication"
-    compileSdkVersion 34 // Set your desired compileSdkVersion
-    ndkVersion "21.4.7075529" // Set your desired ndkVersion
+    compileSdkVersion 34
+    ndkVersion "21.4.7075529"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -26,7 +26,7 @@ android {
     defaultConfig {
         applicationId "com.example.dentalprogapplication"
         minSdkVersion flutter.minSdkVersion // Set your desired minSdkVersion
-        targetSdkVersion 30 // Set your desired targetSdkVersion
+        targetSdkVersion 34 // Updated target SDK version
         versionCode 1 // Default value, it will be overwritten from local.properties
         versionName "1.0" // Default value, it will be overwritten from local.properties
         multiDexEnabled true
@@ -53,12 +53,18 @@ flutter {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
-    implementation ('com.google.firebase:firebase-appcheck')
-    implementation ('com.google.firebase:firebase-appcheck-playintegrity')
+    implementation platform("com.google.firebase:firebase-bom:32.7.2")
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-appcheck'
+    implementation 'com.google.firebase:firebase-appcheck-playintegrity'
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.0'
+
 }
 
-// Loading properties from local.properties
 def loadLocalProperties() {
     def props = new Properties()
     file('local.properties').withInputStream { stream ->
@@ -69,10 +75,9 @@ def loadLocalProperties() {
 
 def localProperties = loadLocalProperties()
 
-// Read flutter version code and version name from local.properties
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode', '1').toInteger()
 def flutterVersionName = localProperties.getProperty('flutter.versionName', '1.0')
 
-// Apply the loaded properties
 android.defaultConfig.versionCode = flutterVersionCode
 android.defaultConfig.versionName = flutterVersionName
+apply plugin: 'com.google.gms.google-services'

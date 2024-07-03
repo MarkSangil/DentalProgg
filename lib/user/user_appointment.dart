@@ -1,4 +1,3 @@
-// import 'package:dentalprogapplication/authentication/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dentalprogapplication/user/user_back.dart';
 import 'package:dentalprogapplication/user/user_schedule.dart';
@@ -33,11 +32,8 @@ class _user_appointmentPage extends State<user_appointmentPage> {
               width: double.infinity,
               height: double.infinity,
             ),
-
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               margin: const EdgeInsets.only(top: 10),
               child: ListView(
                 children: [
@@ -87,8 +83,7 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                             ],
                           ),
                         ),
-                        const SizedBox(
-                            width: 10),
+                        const SizedBox(width: 10),
                       ],
                     ),
                   ),
@@ -107,7 +102,7 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: ((context) =>
-                                          const UserSchedulePage())));
+                                      const UserSchedulePage())));
                             },
                             child: const Text(
                               'SELECT SCHEDULE',
@@ -152,9 +147,6 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                             ],
                           ),
                         ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                        ),
                         SizedBox(
                           height: MediaQuery.of(context).size.height / 3,
                           child: SingleChildScrollView(
@@ -165,79 +157,59 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                                   final data = snapshot.data?.docs ?? [];
                                   return Container(
                                     padding: const EdgeInsets.all(5),
-                                    child: Column(
-                                      children: [
-                                        for (int index = 0; index < data.length; index++)
-                                          Column(
-                                            children: [
-                                              Container(
-                                                padding: const EdgeInsets.all(10),
-                                                margin: const EdgeInsets.all(3),
-                                                decoration: BoxDecoration(
-                                                    color: const Color.fromARGB(96, 210, 31, 61),
-                                                    borderRadius: BorderRadius.circular(20)),
-                                                child: Column(
-                                                  children: [
-                                                    Container(
-                                                      alignment: Alignment.bottomLeft,
-                                                      child: Row(
-                                                        children: [
-                                                          // Container(
-                                                          //   alignment: Alignment
-                                                          //       .center,
-                                                          //   width: 30,
-                                                          //   height: 30,
-                                                          //   decoration:
-                                                          //       BoxDecoration(
-                                                          //     color:
-                                                          //         Colors.white,
-                                                          //     borderRadius:
-                                                          //         BorderRadius
-                                                          //             .circular(
-                                                          //                 20),
-                                                          //   ),
-                                                          //   child: Text(
-                                                          //     '${index + 1}', // Display the counter
-                                                          //     style:
-                                                          //         const TextStyle(
-                                                          //       color: Colors
-                                                          //           .redAccent,
-                                                          //       fontSize: 18,
-                                                          //       fontWeight:
-                                                          //           FontWeight
-                                                          //               .w700,
-                                                          //     ),
-                                                          //   ),
-                                                          // ),
-                                                          Text(
-                                                            ' ${data[index]['name']}',
-                                                            style: const TextStyle(
-                                                              color: Colors.white,
-                                                              fontWeight: FontWeight.w700, fontSize: 20,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              5),
-                                                      alignment:
-                                                          Alignment.bottomLeft,
-                                                      child: Text(
-                                                        'Date: ${data[index]['date'] ?? ''} - Time: ${data[index]['time'] ?? ''}',
-                                                        style: const TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
+                                    child: DataTable(
+                                      columns: const [
+                                        DataColumn(
+                                          label: Text(
+                                            'Name',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
                                           ),
+                                        ),
+                                        DataColumn(
+                                          label: Text(
+                                            'Date',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
+                                          ),
+                                        ),
+                                        DataColumn(
+                                          label: Text(
+                                            'Time',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
+                                          ),
+                                        ),
                                       ],
+                                      rows: data
+                                          .map(
+                                            (doc) => DataRow(
+                                          cells: [
+                                            DataCell(Text(
+                                              doc['name'],
+                                              style: const TextStyle(
+                                                  color: Colors.white),
+                                            )),
+                                            DataCell(Text(
+                                              doc['date'] ?? '',
+                                              style: const TextStyle(
+                                                  color: Colors.white),
+                                            )),
+                                            DataCell(Text(
+                                              doc['time'] ?? '',
+                                              style: const TextStyle(
+                                                  color: Colors.white),
+                                            )),
+                                          ],
+                                        ),
+                                      )
+                                          .toList(),
                                     ),
                                   );
                                 } else {

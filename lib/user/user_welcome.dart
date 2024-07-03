@@ -1,306 +1,429 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dentalprogapplication/firebaseDBModel.dart';
 import 'package:dentalprogapplication/logout.dart';
 import 'package:dentalprogapplication/user/user_announcement.dart';
 import 'package:dentalprogapplication/user/user_appointment.dart';
-import 'package:dentalprogapplication/user/user_emergency.dart';
 import 'package:dentalprogapplication/user/user_profile.dart';
-import 'package:dentalprogapplication/user/user_top.dart';
 import 'package:dentalprogapplication/user/user_viewmessage.dart';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-void main() {
-  runApp(const user_welcomePage());
-}
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
 
 class user_welcomePage extends StatefulWidget {
-  const user_welcomePage({super.key});
+  const user_welcomePage({Key? key}) : super(key: key);
 
   @override
-  _user_welcomePage createState() => _user_welcomePage();
+  _user_welcomePageState createState() => _user_welcomePageState();
 }
 
-class _user_welcomePage extends State<user_welcomePage> {
+class _user_welcomePageState extends State<user_welcomePage> {
+  Set<String> clickedAnnouncements = Set<String>();
+  bool hasUnreadAnnouncements = true;
+  String unreadAnnouncementTitle = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+    _loadAnnouncementData();
+  }
+
+  Future<void> _initializeNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    final InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> _loadAnnouncementData() async {
+    clickedAnnouncements = await AnnouncementHelper.loadClickedAnnouncements();
+    _checkUnreadAnnouncements();
+  }
+
+  Future<void> _checkUnreadAnnouncements() async {
+    var querySnapshot = await FirebaseFirestore.instance.collection('announcements').get();
+    bool unread = false;
+    String title = '';
+
+    for (var doc in querySnapshot.docs) {
+      if (!clickedAnnouncements.contains(doc.id)) {
+        unread = true;
+        title = doc['title'];
+        break;
+      }
+    }
+
+    setState(() {
+      hasUnreadAnnouncements = unread;
+      unreadAnnouncementTitle = title;
+      if (unread) {
+        _showNotification(title);
+      }
+    });
+  }
+
+  Future<void> _saveClickedAnnouncements() async {
+    await AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
+  }
+
+  NotificationDetails getDefaultNotificationDetails(String title) {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+      'your_channel_id',
+      'your_channel_name',
+      channelDescription: 'your_channel_description',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: false,
+    );
+    const NotificationDetails platformChannelSpecifics =
+    NotificationDetails(android: androidPlatformChannelSpecifics);
+    return platformChannelSpecifics;
+  }
+
+  Future<void> _showNotification(String title) async {
+    NotificationDetails defaultNotificationDetails = getDefaultNotificationDetails(title);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      title,
+      'New Announcement',
+      defaultNotificationDetails,
+      payload: 'item x',
+    );
+    print('Notification Shown with title: $title');
+  }
+
+  void _refreshAnnouncements() {
+    _checkUnreadAnnouncements();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: "Poppins",
-      ),
-      home: Scaffold(
-        body: Stack(
-          children: [
-            Image.asset(
-              'asset/bg.jpg',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-              ),
-              child: ListView(
-                children: [
-                  const user_topPage(),
-                  Container(
-                    padding: const EdgeInsets.only(bottom: 20, left: 5),
-                    child: const Row(
-                      children: [
-                        FaIcon(
-                          FontAwesomeIcons.userCircle,
-                          size: 40,
-                          color: Colors.black,
-                        ),
-                        Text(
-                          ' USER',
-                          style: TextStyle(
+    return Scaffold(
+      body: Stack(
+        children: [
+          Image.asset(
+            'asset/bg.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 50, left: 5, right: 5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          FaIcon(
+                            FontAwesomeIcons.circleUser,
+                            size: 40,
+                            color: Colors.black,
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            'USER',
+                            style: TextStyle(
                               fontSize: 30,
                               color: Colors.black,
-                              fontWeight: FontWeight.w500),
-                        )
-                      ],
-                    ),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Image.asset(
+                        'asset/logo.png',
+                        width: 40,
+                        height: 40,
+                      ),
+                    ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            child: Container(
-                              padding: const EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: const Color(0xddD21f3C),
-                                borderRadius: BorderRadius.circular(20),
+                ),
+                Spacer(flex: 2),
+                Expanded(
+                  flex: 6,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => user_profilePage(),
                               ),
-                              child: Column(
-                                children: [
-                                  AspectRatio(
-                                      aspectRatio: 1.3,
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        child: const FaIcon(
-                                          FontAwesomeIcons.solidUser,
-                                          size: 100,
-                                          color: Colors.white,
-                                        ),
-                                      )),
-                                  const Text(
-                                    'Profile',
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white),
-                                  )
-                                ],
-                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(15),
+                            margin: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xddD21f3C),
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const user_profilePage())),
-                          ),
-                        ),
-                        const SizedBox(
-                            width: 10),
-                        Expanded(
-                          child: GestureDetector(
-                            child: Container(
-                              padding: const EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: const Color(0xddD21f3C),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Column(
-                                children: [
-                                  AspectRatio(
-                                    aspectRatio: 1.3,
-                                    child: Image(
-                                      image:
-                                          AssetImage('asset/announcement.png'),
-                                    ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                FaIcon(
+                                  FontAwesomeIcons.solidUser,
+                                  size: 50,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  'Profile',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
                                   ),
-                                  Text(
-                                    'Announcement',
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white),
-                                  )
-                                ],
-                              ),
+                                )
+                              ],
                             ),
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const user_announcementPage())),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            child: Container(
-                              padding: const EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: const Color(0xddD21f3C),
-                                borderRadius: BorderRadius.circular(20),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => user_announcementPage(
+                                  markAsRead: (id) {
+                                    setState(() {
+                                      clickedAnnouncements.add(id);
+                                      _saveClickedAnnouncements();
+                                    });
+                                  },
+                                  onAnnouncementRead: _refreshAnnouncements,
+                                ),
                               ),
-                              child: const Column(
-                                children: [
-                                  AspectRatio(
-                                    aspectRatio: 1.3,
-                                    child: Image(
-                                      image:
-                                          AssetImage('asset/appointment.png'),
-                                    ),
-                                  ),
-                                  Text(
-                                    'Appointment',
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white),
-                                  )
-                                ],
-                              ),
-                            ),
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const user_appointmentPage())),
-                          ),
-                        ),
-                        const SizedBox(
-                            width: 10),
-                        Expanded(
-                          child: GestureDetector(
-                              child: Container(
+                            );
+                          },
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
                                 padding: const EdgeInsets.all(15),
+                                margin: const EdgeInsets.all(5),
                                 decoration: BoxDecoration(
                                   color: const Color(0xddD21f3C),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: const Column(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    AspectRatio(
-                                      aspectRatio: 1.3,
-                                      child: Image(
-                                        image: AssetImage('asset/message.png'),
+                                    Image.asset(
+                                      'asset/announcement.png',
+                                      width: 50,
+                                      height: 50,
+                                    ),
+                                    SizedBox(height: 10),
+                                    Text(
+                                      'Announcement',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white,
                                       ),
                                     ),
-                                    Text(
-                                      'Message',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.white),
-                                    )
                                   ],
                                 ),
                               ),
-                              onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: ((context) => user_viewmessagePage(
-                                            data: firebaseDBModel(
-                                                uid:
-                                                    '0RB7FgoLBoctIJH49Uova6zIhQD3')))),
-                                  )),
+                              if (hasUnreadAnnouncements)
+                                Positioned(
+                                  right: 10,
+                                  top: 10,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    constraints: BoxConstraints(
+                                      minWidth: 20,
+                                      minHeight: 20,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '!',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 20),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xddD21f3C),
-                                borderRadius: BorderRadius.circular(20),
+                ),
+                Expanded(
+                  flex: 6,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => user_appointmentPage(),
                               ),
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  FaIcon(
-                                    FontAwesomeIcons.phone,
-                                    size: 30,
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(15),
+                            margin: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xddD21f3C),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'asset/appointment.png',
+                                  width: 50,
+                                  height: 50,
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  'Appointment',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
                                     color: Colors.white,
                                   ),
-                                  Text(
-                                    ' EMERGENCY',
-                                    style: TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                ],
-                              ),
+                                )
+                              ],
                             ),
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const user_emergencyPage())),
                           ),
                         ),
-                      ],
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: ((context) => user_viewmessagePage(
+                                  data: firebaseDBModel(
+                                      uid: '0RB7FgoLBoctIJH49Uova6zIhQD3'),
+                                )),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(15),
+                            margin: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xddD21f3C),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'asset/message.png',
+                                  width: 50,
+                                  height: 50,
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  'Message',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Spacer(flex: 2),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => logoutPage(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 7, horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 191, 191, 191),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Log out',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 0),
-                  ),
-                  GestureDetector(
-                    child: Container(
-                        width: 100,
-                        alignment: Alignment.center,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 7, horizontal: 20),
-                          decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 191, 191, 191),
-                              borderRadius: BorderRadius.circular(20)),
-                          child: const Text(
-                            'Log out',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500),
-                          ),
-                        )),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const logoutPage()),
-                      );
-                    },
-                  )
-                ],
-              ),
-            )
-          ],
-        ),
+                ),
+                Spacer(flex: 1),
+              ],
+            ),
+          ),
+        ],
       ),
     );
+  }
+}
+
+class AnnouncementHelper {
+  static Future<Set<String>> loadClickedAnnouncements() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('clickedAnnouncements')?.toSet() ?? {};
+  }
+
+  static Future<void> saveClickedAnnouncements(Set<String> clickedAnnouncements) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('clickedAnnouncements', clickedAnnouncements.toList());
+  }
+
+  static Future<bool> checkUnreadAnnouncements(Set<String> clickedAnnouncements) async {
+    var querySnapshot = await FirebaseFirestore.instance.collection('announcements').get();
+    for (var doc in querySnapshot.docs) {
+      if (!clickedAnnouncements.contains(doc.id)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
