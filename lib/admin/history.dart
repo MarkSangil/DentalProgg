@@ -1,20 +1,16 @@
-// ignore_for_file: file_names
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dentalprogapplication/admin/back.dart';
 import 'package:flutter/material.dart';
 
-// ignore: camel_case_types
 class historyPage extends StatefulWidget {
   final String uid;
   const historyPage({super.key, required this.uid});
 
   @override
-  // ignore: library_private_types_in_public_api
   _historyPage createState() => _historyPage();
 }
 
-// ignore: camel_case_types
 class _historyPage extends State<historyPage> {
   @override
   Widget build(BuildContext context) {
@@ -23,14 +19,12 @@ class _historyPage extends State<historyPage> {
       home: Scaffold(
         body: Stack(
           children: [
-            // Background Image
             Image.asset(
               'asset/bg.jpg',
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
             ),
-
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: 10,
@@ -61,10 +55,7 @@ class _historyPage extends State<historyPage> {
                             ),
                           ),
                         ),
-
-                        const SizedBox(
-                            width: 10), // Add some space between the containers
-
+                        const SizedBox(width: 10),
                         Column(
                           children: [
                             GestureDetector(

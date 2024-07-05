@@ -137,6 +137,32 @@ class _user_profilePage extends State<user_profilePage> {
     }
   }
 
+  Future<void> showSuccessDialog() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: const [
+              Icon(Icons.check_circle, color: Colors.green),
+              SizedBox(width: 10),
+              Text('Success'),
+            ],
+          ),
+          content: const Text('Successfully updated profile'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -154,7 +180,7 @@ class _user_profilePage extends State<user_profilePage> {
               height: double.infinity,
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ListView(
                 children: [
                   const user_backPage(),
@@ -167,13 +193,15 @@ class _user_profilePage extends State<user_profilePage> {
                           size: 40,
                           color: Colors.black,
                         ),
+                        SizedBox(width: 10),
                         Text(
-                          ' USER',
+                          'USER',
                           style: TextStyle(
-                              fontSize: 30,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500),
-                        )
+                            fontSize: 30,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -184,31 +212,31 @@ class _user_profilePage extends State<user_profilePage> {
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
+                            color: const Color(0xddD21f3C),
                           ),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                alignment: Alignment.bottomLeft,
-                                child: const Text(
-                                  'NAME',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
+                              const Text(
+                                'NAME',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black,
                                 ),
                               ),
+                              const SizedBox(height: 10),
                               Container(
-                                padding: const EdgeInsets.only(left: 10),
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xddD21f3C),
-                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: TextField(
                                   controller: _nameController,
                                   decoration: const InputDecoration(
                                     border: InputBorder.none,
+                                    prefixIcon: Icon(Icons.person),
                                   ),
                                 ),
                               ),
@@ -229,21 +257,25 @@ class _user_profilePage extends State<user_profilePage> {
                           ),
                           child: Column(
                             children: [
-                              image != null
-                                  ? Image.file(
-                                File(image!.path),
-                                width: 70,
-                                height: 70,
-                              )
-                                  : images.isNotEmpty
-                                  ? Image.network(
-                                images,
-                                width: 70,
-                                height: 70,
-                              )
-                                  : const FaIcon(
-                                FontAwesomeIcons.circleUser,
-                                size: 70,
+                              ClipOval(
+                                child: image != null
+                                    ? Image.file(
+                                  File(image!.path),
+                                  width: 70,
+                                  height: 70,
+                                  fit: BoxFit.cover,
+                                )
+                                    : images.isNotEmpty
+                                    ? Image.network(
+                                  images,
+                                  width: 70,
+                                  height: 70,
+                                  fit: BoxFit.cover,
+                                )
+                                    : const FaIcon(
+                                  FontAwesomeIcons.circleUser,
+                                  size: 70,
+                                ),
                               ),
                               const Text(
                                 'Profile',
@@ -251,150 +283,6 @@ class _user_profilePage extends State<user_profilePage> {
                                   color: Colors.black,
                                   fontWeight: FontWeight.w500,
                                 ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            children: [
-                              Container(
-                                alignment: Alignment.bottomLeft,
-                                child: const Text(
-                                  'AGE',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black),
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.only(left: 10),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xddD21f3C),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: TextField(
-                                  controller: _ageController,
-                                  decoration: const InputDecoration(
-                                      border: InputBorder.none),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                          width: 10),
-                      Expanded(
-                        child: GestureDetector(
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              children: [
-                                Container(
-                                  alignment: Alignment.bottomLeft,
-                                  child: const Text(
-                                    'CONTACT',
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.only(left: 10),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xddD21f3C),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: TextField(
-                                    controller: _contactController,
-                                    decoration: const InputDecoration(
-                                        border: InputBorder.none),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const messagePage())),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            children: [
-                              Container(
-                                alignment: Alignment.bottomLeft,
-                                child: const Text(
-                                  'GENDER',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black),
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.only(left: 10),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xddD21f3C),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: TextField(
-                                  controller: _genderController,
-                                  decoration: const InputDecoration(
-                                      border: InputBorder.none),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                          width: 10),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            children: [
-                              Container(
-                                alignment: Alignment.bottomLeft,
-                                child: const Text(
-                                  'EMAIL ADDRESS',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black),
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.only(left: 10),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xddD21f3C),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: TextField(
-                                  controller: _emailController,
-                                  decoration: const InputDecoration(
-                                      border: InputBorder.none),
-                                ),
                               ),
                             ],
                           ),
@@ -402,220 +290,139 @@ class _user_profilePage extends State<user_profilePage> {
                       ),
                     ],
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(15),
-                          child: Column(
-                            children: [
-                              Container(
-                                alignment: Alignment.bottomLeft,
-                                child: const Text(
-                                  'BIRTHDAY',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black),
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.only(left: 10),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xddD21f3C),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: TextField(
-                                  controller: _birthdayController,
-                                  decoration: const InputDecoration(
-                                      border: InputBorder.none),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                          width: 10),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(15),
-                          child: Column(
-                            children: [
-                              Container(
-                                alignment: Alignment.bottomLeft,
-                                child: const Text(
-                                  'ADDRESS',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black),
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.only(left: 10),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xddD21f3C),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: TextField(
-                                  controller: _addressController,
-                                  decoration: const InputDecoration(
-                                      border: InputBorder.none),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 20),
+                  _buildProfileRow(
+                    title: 'AGE',
+                    controller: _ageController,
+                    icon: Icons.cake,
                   ),
+                  _buildProfileRow(
+                    title: 'CONTACT',
+                    controller: _contactController,
+                    icon: Icons.phone,
+                    onTap: () => Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => const messagePage())),
+                  ),
+                  _buildProfileRow(
+                    title: 'GENDER',
+                    controller: _genderController,
+                    icon: Icons.wc,
+                  ),
+                  _buildProfileRow(
+                    title: 'EMAIL ADDRESS',
+                    controller: _emailController,
+                    icon: Icons.email,
+                  ),
+                  _buildProfileRow(
+                    title: 'BIRTHDAY',
+                    controller: _birthdayController,
+                    icon: Icons.calendar_today,
+                  ),
+                  _buildProfileRow(
+                    title: 'ADDRESS',
+                    controller: _addressController,
+                    icon: Icons.home,
+                  ),
+                  _buildProfileRow(
+                    title: 'EC NAME',
+                    controller: _ec_nameController,
+                    icon: Icons.person,
+                  ),
+                  _buildProfileRow(
+                    title: 'EC CONTACT NO',
+                    controller: _ec_contact_noController,
+                    icon: Icons.phone,
+                  ),
+                  _buildProfileRow(
+                    title: 'RELATIONSHIP TO PATIENT',
+                    controller: _relationship_to_patientController,
+                    icon: Icons.group,
+                  ),
+                  const SizedBox(height: 20),
                   Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            ' EC NAME',
-                            style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.only(left: 10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xddD21f3C),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: TextField(
-                              controller: _ec_nameController,
-                              decoration: const InputDecoration(
-                                  border: InputBorder.none),
-                            ),
-                          ),
-                        )
-                      ],
+                    height: 55,
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: TextButton(
+                      onPressed: () async {
+                        // Make sure downloadURL is up-to-date before saving
+                        if (image != null && downloadURL.isNotEmpty) {
+                          await updateUserProfileImage(downloadURL);
+                        }
+                        Controller().Profile(
+                            _uidController.text,
+                            _nameController.text,
+                            _emailController.text,
+                            _ageController.text,
+                            _contactController.text,
+                            _genderController.text,
+                            _birthdayController.text,
+                            _addressController.text,
+                            _ec_nameController.text,
+                            _ec_contact_noController.text,
+                            _relationship_to_patientController.text,
+                            downloadURL); // Pass the updated downloadURL
+                        await showSuccessDialog();
+                      },
+                      child: const Text(
+                        'Save',
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            ' EC CONTACT NO',
-                            style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.only(left: 10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xddD21f3C),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: TextField(
-                              controller: _ec_contact_noController,
-                              decoration: const InputDecoration(
-                                  border: InputBorder.none),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            'RELATIONSHIP TO PATIENT',
-                            style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black),
-                          ),
-                        ),
-                        Container(
-                          width: 120,
-                          padding: const EdgeInsets.only(left: 10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xddD21f3C),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: TextField(
-                            controller: _relationship_to_patientController,
-                            decoration:
-                            const InputDecoration(border: InputBorder.none),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                      height: 55,
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: SizedBox(
-                        child: TextButton(
-                          onPressed: () async {
-                            // Make sure downloadURL is up-to-date before saving
-                            if (image != null && downloadURL.isNotEmpty) {
-                              await updateUserProfileImage(downloadURL);
-                            }
-                            Controller().Profile(
-                                _uidController.text,
-                                _nameController.text,
-                                _emailController.text,
-                                _ageController.text,
-                                _contactController.text,
-                                _genderController.text,
-                                _birthdayController.text,
-                                _addressController.text,
-                                _ec_nameController.text,
-                                _ec_contact_noController.text,
-                                _relationship_to_patientController.text,
-                                downloadURL); // Pass the updated downloadURL
-                            String errorMessage = 'Successfully Update Profile';
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Update Profile'),
-                                  content: Text(errorMessage),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          child: const Text(
-                            'Save',
-                            style: TextStyle(color: Colors.white, fontSize: 20),
-                          ),
-                        ),
-                      )),
-                  Container(margin: const EdgeInsets.only(bottom: 20))
+                  const SizedBox(height: 20),
                 ],
               ),
             )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileRow({
+    required String title,
+    required TextEditingController controller,
+    IconData? icon,
+    void Function()? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: const Color(0xddD21f3C),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  prefixIcon: Icon(icon),
+                ),
+              ),
+            ),
           ],
         ),
       ),

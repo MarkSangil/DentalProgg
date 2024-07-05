@@ -93,21 +93,26 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 50),
                     child: Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(20),
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: ((context) => const UserSchedulePage()),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'SELECT SCHEDULE',
+                          style: TextStyle(fontSize: 24, color: Colors.white),
                         ),
-                        child: TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) =>
-                                      const UserSchedulePage())));
-                            },
-                            child: const Text(
-                              'SELECT SCHEDULE',
-                              style: TextStyle(fontSize: 24, color: Colors.white),
-                            ))),
+                      ),
+                    ),
                   ),
                   Container(
                     margin: const EdgeInsets.all(10),
@@ -116,8 +121,9 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                     margin: const EdgeInsets.only(bottom: 20),
                     padding: const EdgeInsets.only(bottom: 20, top: 20),
                     decoration: BoxDecoration(
-                        color: const Color.fromARGB(100, 210, 31, 61),
-                        borderRadius: BorderRadius.circular(20)),
+                      color: const Color.fromARGB(100, 210, 31, 61),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     child: Column(
                       children: [
                         Container(
@@ -135,15 +141,17 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                                 color: Colors.white,
                               ),
                               Container(
-                                  alignment: Alignment.center,
-                                  padding: const EdgeInsets.all(5),
-                                  child: const Text(
-                                    'List Of Appointments',
-                                    style: TextStyle(
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.white),
-                                  )),
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(5),
+                                child: const Text(
+                                  'List Of Appointments',
+                                  style: TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -151,7 +159,9 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                           height: MediaQuery.of(context).size.height / 3,
                           child: SingleChildScrollView(
                             child: StreamBuilder<QuerySnapshot>(
-                              stream: FirebaseFirestore.instance.collection('appointment').snapshots(),
+                              stream: FirebaseFirestore.instance
+                                  .collection('appointment')
+                                  .snapshots(),
                               builder: ((context, snapshot) {
                                 if (snapshot.hasData) {
                                   final data = snapshot.data?.docs ?? [];
@@ -163,57 +173,63 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                                           label: Text(
                                             'Name',
                                             style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white),
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
                                         DataColumn(
                                           label: Text(
                                             'Date',
                                             style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white),
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
                                         DataColumn(
                                           label: Text(
                                             'Time',
                                             style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white),
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
                                       ],
-                                      rows: data
-                                          .map(
-                                            (doc) => DataRow(
+                                      rows: data.map((doc) {
+                                        final name = doc['name'] ?? '';
+                                        final date = doc['date'] ?? '';
+                                        final time = doc['time'] ?? '';
+                                        return DataRow(
                                           cells: [
                                             DataCell(Text(
-                                              doc['name'],
+                                              name,
                                               style: const TextStyle(
                                                   color: Colors.white),
                                             )),
                                             DataCell(Text(
-                                              doc['date'] ?? '',
+                                              date,
                                               style: const TextStyle(
                                                   color: Colors.white),
                                             )),
                                             DataCell(Text(
-                                              doc['time'] ?? '',
+                                              time,
                                               style: const TextStyle(
                                                   color: Colors.white),
                                             )),
                                           ],
-                                        ),
-                                      )
-                                          .toList(),
+                                        );
+                                      }).toList(),
                                     ),
                                   );
                                 } else {
-                                  return const Text('NO DATA');
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
                                 }
                               }),
                             ),

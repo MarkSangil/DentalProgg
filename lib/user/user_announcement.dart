@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class AnnouncementHelper {
   static Future<Set<String>> loadClickedAnnouncements() async {
@@ -55,10 +56,9 @@ class _user_announcementPageState extends State<user_announcementPage> {
     setState(() {
       hasUnreadAnnouncements = unread;
     });
-    print('Announcement page - hasUnreadAnnouncements: $hasUnreadAnnouncements');
   }
 
-  void _showAnnouncementDialog(BuildContext context, String id, String title, String description) {
+  void _showAnnouncementDialog(BuildContext context , String id, String title, String description, DateTime dateAndTime) {
     setState(() {
       clickedAnnouncements.add(id);
       AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
@@ -72,7 +72,15 @@ class _user_announcementPageState extends State<user_announcementPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(title),
-          content: Text(description),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Date: ${DateFormat('yyyy-MM-dd – kk:mm').format(dateAndTime)}'),
+              SizedBox(height: 10),
+              Text(description),
+            ],
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -111,8 +119,9 @@ class _user_announcementPageState extends State<user_announcementPage> {
                         size: 40,
                         color: Colors.black,
                       ),
+                      SizedBox(width: 10), // Added space between icon and text
                       Text(
-                        ' USER',
+                        'USER',
                         style: TextStyle(
                           fontSize: 30,
                           color: Colors.black,
@@ -130,6 +139,13 @@ class _user_announcementPageState extends State<user_announcementPage> {
                       decoration: BoxDecoration(
                         color: const Color(0xddD21f3C),
                         borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                          ),
+                        ],
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -144,7 +160,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 5),
+                          SizedBox(height: 10),
                           Text(
                             'Announcement',
                             style: TextStyle(
@@ -163,7 +179,16 @@ class _user_announcementPageState extends State<user_announcementPage> {
                 ),
                 Container(
                   padding: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                      ),
+                    ],
+                  ),
                   child: Column(
                     children: [
                       Container(
@@ -171,6 +196,13 @@ class _user_announcementPageState extends State<user_announcementPage> {
                         decoration: BoxDecoration(
                           color: const Color(0xddD21f3C),
                           borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                            ),
+                          ],
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -202,6 +234,13 @@ class _user_announcementPageState extends State<user_announcementPage> {
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(111, 210, 31, 61),
                           borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                            ),
+                          ],
                         ),
                         child: StreamBuilder<QuerySnapshot>(
                           stream: FirebaseFirestore.instance
@@ -216,22 +255,47 @@ class _user_announcementPageState extends State<user_announcementPage> {
                                 itemBuilder: (context, index) {
                                   String id = data[index].id;
                                   bool isClicked = clickedAnnouncements.contains(id);
+                                  var dateAndTimeRaw = data[index]['dateandtime'];
+                                  DateTime dateAndTime;
+
+                                  if (dateAndTimeRaw is Timestamp) {
+                                    dateAndTime = dateAndTimeRaw.toDate();
+                                  } else if (dateAndTimeRaw is String) {
+                                    dateAndTime = DateTime.parse(dateAndTimeRaw);
+                                  } else {
+                                    dateAndTime = DateTime.now(); // Fallback if no valid date
+                                  }
+
                                   return Container(
                                     margin: const EdgeInsets.symmetric(vertical: 5),
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
+                                      color: isClicked ? Colors.grey[200] : Colors.white,
                                       border: Border.all(
                                         color: isClicked ? Colors.grey : Colors.white,
                                         width: 2,
                                       ),
                                       borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          spreadRadius: 1,
+                                          blurRadius: 3,
+                                        ),
+                                      ],
                                     ),
                                     child: ListTile(
                                       title: Text(
                                         data[index]['title'] ?? '',
                                         style: TextStyle(
-                                          color: isClicked ? Colors.grey : Colors.white,
+                                          color: isClicked ? Colors.grey : Colors.black,
                                           fontWeight: isClicked ? FontWeight.normal : FontWeight.bold,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        'Date: ${DateFormat('yyyy-MM-dd – kk:mm').format(dateAndTime)}',
+                                        style: TextStyle(
+                                          color: isClicked ? Colors.grey : Colors.black,
                                         ),
                                       ),
                                       onTap: () {
@@ -240,6 +304,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                                           id,
                                           data[index]['title'] ?? '',
                                           data[index]['description'] ?? '',
+                                          dateAndTime,
                                         );
                                       },
                                     ),
@@ -247,7 +312,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                                 },
                               );
                             } else {
-                              return const Text('NO DATA');
+                              return const Center(child: CircularProgressIndicator());
                             }
                           }),
                         ),
