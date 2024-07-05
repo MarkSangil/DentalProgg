@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -11,8 +12,7 @@ import 'package:dentalprogapplication/user/user_appointment.dart';
 import 'package:dentalprogapplication/user/user_profile.dart';
 import 'package:dentalprogapplication/user/user_viewmessage.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 class user_welcomePage extends StatefulWidget {
   const user_welcomePage({Key? key}) : super(key: key);
@@ -25,17 +25,18 @@ class _user_welcomePageState extends State<user_welcomePage> {
   Set<String> clickedAnnouncements = Set<String>();
   bool hasUnreadAnnouncements = false;
   String unreadAnnouncementTitle = '';
+  int unreadMessagesCount = 0;
 
   @override
   void initState() {
     super.initState();
     _initializeNotifications();
     _loadAnnouncementData();
+    _loadUnreadMessagesCount();
   }
 
   Future<void> _initializeNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
 
     final InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
@@ -48,8 +49,7 @@ class _user_welcomePageState extends State<user_welcomePage> {
 
     if (Platform.isIOS) {
       await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(
         alert: true,
         badge: true,
@@ -91,8 +91,7 @@ class _user_welcomePageState extends State<user_welcomePage> {
   }
 
   NotificationDetails getDefaultNotificationDetails(String title) {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
+    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'your_channel_id',
       'your_channel_name',
       channelDescription: 'your_channel_description',
@@ -100,8 +99,7 @@ class _user_welcomePageState extends State<user_welcomePage> {
       priority: Priority.high,
       showWhen: false,
     );
-    const NotificationDetails platformChannelSpecifics =
-    NotificationDetails(android: androidPlatformChannelSpecifics);
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
     return platformChannelSpecifics;
   }
 
@@ -123,6 +121,30 @@ class _user_welcomePageState extends State<user_welcomePage> {
 
   void _refreshAnnouncements() {
     _checkUnreadAnnouncements();
+  }
+
+  Future<void> _loadUnreadMessagesCount() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      var querySnapshot = await FirebaseFirestore.instance
+          .collection('messages')
+          .where('receiver_id', isEqualTo: user.uid)
+          .get();
+
+      int unreadCount = 0;
+      for (var doc in querySnapshot.docs) {
+        if (doc.data().containsKey('read') && !doc['read']) {
+          unreadCount++;
+        } else if (!doc.data().containsKey('read')) {
+          unreadCount++;
+        }
+      }
+
+      setState(() {
+        unreadMessagesCount = unreadCount;
+      });
+    }
   }
 
   @override
@@ -355,32 +377,63 @@ class _user_welcomePageState extends State<user_welcomePage> {
                               ),
                             );
                           },
-                          child: Container(
-                            padding: const EdgeInsets.all(15),
-                            margin: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: const Color(0xddD21f3C),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  'asset/message.png',
-                                  width: 50,
-                                  height: 50,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(15),
+                                margin: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xddD21f3C),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                                SizedBox(height: 10),
-                                Text(
-                                  'Message',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'asset/message.png',
+                                      width: 50,
+                                      height: 50,
+                                    ),
+                                    SizedBox(height: 10),
+                                    Text(
+                                      'Message',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (unreadMessagesCount > 0)
+                                Positioned(
+                                  right: 10,
+                                  top: 10,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    constraints: BoxConstraints(
+                                      minWidth: 20,
+                                      minHeight: 20,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '$unreadMessagesCount',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                )
-                              ],
-                            ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
@@ -400,8 +453,7 @@ class _user_welcomePageState extends State<user_welcomePage> {
                   child: Container(
                     alignment: Alignment.center,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 7, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 20),
                       decoration: BoxDecoration(
                         color: const Color.fromARGB(255, 191, 191, 191),
                         borderRadius: BorderRadius.circular(20),

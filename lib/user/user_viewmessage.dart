@@ -4,18 +4,16 @@ import 'package:dentalprogapplication/firebaseDBModel.dart';
 import 'package:dentalprogapplication/user/user_welcome.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-// ignore: camel_case_types
 class user_viewmessagePage extends StatefulWidget {
   final firebaseDBModel data;
   const user_viewmessagePage({Key? key, required this.data}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _user_viewmessagePage createState() => _user_viewmessagePage();
 }
 
-// ignore: camel_case_types
 class _user_viewmessagePage extends State<user_viewmessagePage> {
   final user = FirebaseAuth.instance.currentUser;
   final TextEditingController _messageController = TextEditingController();
@@ -32,12 +30,14 @@ class _user_viewmessagePage extends State<user_viewmessagePage> {
         'message': messageText,
         'receiver_id': widget.data.uid,
         'timestamp': Timestamp.now(), // Add a timestamp for sorting
+        'read': false,
       };
 
       // Add message to Firestore collection named 'messages'
       await firestore.collection('messages').add(messageData);
-      // ignore: empty_catches
-    } catch (error) {}
+    } catch (error) {
+      // Handle error here
+    }
   }
 
   Duration duration = const Duration();
@@ -57,17 +57,16 @@ class _user_viewmessagePage extends State<user_viewmessagePage> {
           backgroundColor: const Color(0xddD21f3C),
           title: Row(
             children: [
-              GestureDetector(
-                child: const Icon(
-                  Icons.arrow_left,
-                  size: 40,
+              IconButton(
+                icon: const Icon(
+                  Icons.arrow_back,
                   color: Colors.white,
                 ),
-                onTap: () {
-                  Navigator.push(
+                onPressed: () {
+                  Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => user_welcomePage(),
+                        builder: (context) => const user_welcomePage(),
                       ));
                 },
               ),
@@ -79,93 +78,129 @@ class _user_viewmessagePage extends State<user_viewmessagePage> {
           ),
         ),
         body: Container(
-            color: Colors.white,
-            child: Column(
-              children: [
-                Expanded(
-                  child: StreamBuilder(
-                      stream: FirebaseFirestore.instance
-                          .collection('messages')
-                          .where('code', isEqualTo: user!.uid)
-                          .snapshots(),
-                      builder:
-                          (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                        final messages = snapshot.data!.docs;
+          color: Colors.white,
+          child: Column(
+            children: [
+              Expanded(
+                child: StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('messages')
+                      .where('code', isEqualTo: user!.uid)
+                      .snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(child: Text('No messages found.'));
+                    }
 
-                        messages.sort((a, b) {
-                          DateTime timestampA = a['timestamp'].toDate();
-                          DateTime timestampB = b['timestamp'].toDate();
-                          return timestampA.compareTo(timestampB);
-                        });
+                    final messages = snapshot.data!.docs;
+                    messages.sort((a, b) {
+                      DateTime timestampA = a['timestamp'].toDate();
+                      DateTime timestampB = b['timestamp'].toDate();
+                      return timestampA.compareTo(timestampB);
+                    });
 
-                        return ListView.builder(
-                          itemCount: messages.length,
-                          itemBuilder: (context, index) {
-                            final message = messages[index];
-                            final senderId = message['sender_id'];
-                            DateTime messageTimestamp =
-                                message['timestamp'].toDate();
+                    // Mark all displayed messages as read
+                    for (var message in messages) {
+                      final messageData = message.data() as Map<String, dynamic>;
+                      if (messageData.containsKey('read') && !messageData['read'] && messageData['receiver_id'] == user.uid) {
+                        message.reference.update({'read': true});
+                      } else if (!messageData.containsKey('read') && messageData['receiver_id'] == user.uid) {
+                        message.reference.update({'read': true});
+                      }
+                    }
 
-                            bool sender = user.uid == senderId;
+                    return ListView.builder(
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final message = messages[index];
+                        final messageData = message.data() as Map<String, dynamic>;
+                        final senderId = messageData['sender_id'];
+                        DateTime messageTimestamp = messageData['timestamp'].toDate();
+                        bool sender = user.uid == senderId;
 
-                            final colors = user.uid == senderId
-                                ? Colors.blue
-                                : Colors.black;
-
-                            return Column(
-                              children: [
-                                DateChip(date: messageTimestamp),
-                                BubbleSpecialThree(
-                                  text: message['message'],
-                                  color: colors,
-                                  tail: true,
-                                  isSender: sender,
-                                  textStyle: const TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }),
-                ),
-                Container(
-                  color: Colors.grey.shade100,
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 50,
-                              padding: const EdgeInsets.only(left: 5),
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20)),
-                              child: TextField(
-                                controller: _messageController,
-                                decoration: const InputDecoration(
-                                  hintText: 'Type a message...',
-                                  border: InputBorder.none,
-                                ),
+                        return Column(
+                          crossAxisAlignment: sender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: DateChip(date: messageTimestamp),
+                            ),
+                            BubbleSpecialThree(
+                              text: messageData['message'],
+                              color: sender ? const Color(0xddD21f3C) : Colors.grey,
+                              tail: true,
+                              isSender: sender,
+                              textStyle: const TextStyle(
+                                  color: Colors.white, fontSize: 16),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                DateFormat('hh:mm a').format(messageTimestamp),
+                                style: const TextStyle(color: Colors.grey, fontSize: 12),
                               ),
                             ),
-                          ),
-                          IconButton(
-                              icon: const Icon(Icons.send),
-                              onPressed: () {
-                                sendMessage(_messageController.text);
-                                _messageController.clear();
-                              }),
-                        ],
-                      )
-                    ],
-                  ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                 ),
-              ],
-            )),
+              ),
+              Container(
+                color: Colors.grey.shade100,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 50,
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 5,
+                            ),
+                          ],
+                        ),
+                        child: TextField(
+                          controller: _messageController,
+                          decoration: const InputDecoration(
+                            hintText: 'Type a message...',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: () {
+                        if (_messageController.text.isNotEmpty) {
+                          sendMessage(_messageController.text);
+                          _messageController.clear();
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xddD21f3C),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.send, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

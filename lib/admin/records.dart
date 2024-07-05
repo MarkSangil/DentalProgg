@@ -146,7 +146,7 @@ class _RecordsPageState extends State<RecordsPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => recordsviewPage(
+                              builder: (context) => RecordsViewPage(
                                 uid: user['uid'],
                                 age: user['age'],
                                 address: user['address'],
