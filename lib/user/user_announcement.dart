@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,6 +16,16 @@ class AnnouncementHelper {
     await prefs.setStringList('clickedAnnouncements', clickedAnnouncements.toList());
   }
 
+  static Future<Set<String>> loadHiddenAnnouncements() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList('hiddenAnnouncements') ?? []).toSet();
+  }
+
+  static Future<void> saveHiddenAnnouncements(Set<String> hiddenAnnouncements) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('hiddenAnnouncements', hiddenAnnouncements.toList());
+  }
+
   static Future<bool> checkUnreadAnnouncements(Set<String> clickedAnnouncements) async {
     final snapshot = await FirebaseFirestore.instance.collection('announcements').get();
     final data = snapshot.docs;
@@ -25,11 +36,13 @@ class AnnouncementHelper {
 class user_announcementPage extends StatefulWidget {
   final Function(String) markAsRead;
   final Function() onAnnouncementRead;
+  final Function() onAnnouncementsHidden;
 
   const user_announcementPage({
     Key? key,
     required this.markAsRead,
     required this.onAnnouncementRead,
+    required this.onAnnouncementsHidden,
   }) : super(key: key);
 
   @override
@@ -38,16 +51,18 @@ class user_announcementPage extends StatefulWidget {
 
 class _user_announcementPageState extends State<user_announcementPage> {
   Set<String> clickedAnnouncements = Set<String>();
+  Set<String> hiddenAnnouncements = Set<String>();
   bool hasUnreadAnnouncements = false;
 
   @override
   void initState() {
     super.initState();
-    _loadClickedAnnouncements();
+    _loadAnnouncementsData();
   }
 
-  Future<void> _loadClickedAnnouncements() async {
+  Future<void> _loadAnnouncementsData() async {
     clickedAnnouncements = await AnnouncementHelper.loadClickedAnnouncements();
+    hiddenAnnouncements = await AnnouncementHelper.loadHiddenAnnouncements();
     _checkUnreadAnnouncements();
   }
 
@@ -58,7 +73,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
     });
   }
 
-  void _showAnnouncementDialog(BuildContext context , String id, String title, String description, DateTime dateAndTime) {
+  void _showAnnouncementDialog(BuildContext context, String id, String title, String description, DateTime dateAndTime) {
     setState(() {
       clickedAnnouncements.add(id);
       AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
@@ -94,6 +109,21 @@ class _user_announcementPageState extends State<user_announcementPage> {
     );
   }
 
+  Future<void> _deleteAllAnnouncements() async {
+    final snapshot = await FirebaseFirestore.instance.collection('announcement').get();
+    for (var doc in snapshot.docs) {
+      hiddenAnnouncements.add(doc.id);
+      clickedAnnouncements.add(doc.id);  // Mark as read
+    }
+    await AnnouncementHelper.saveHiddenAnnouncements(hiddenAnnouncements);
+    await AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
+    setState(() {
+      _checkUnreadAnnouncements();
+    });
+
+    widget.onAnnouncementsHidden();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,8 +142,14 @@ class _user_announcementPageState extends State<user_announcementPage> {
               children: [
                 Container(
                   padding: const EdgeInsets.only(bottom: 10, left: 5),
-                  child: const Row(
+                  child: Row(
                     children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.black),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
                       FaIcon(
                         FontAwesomeIcons.circleUser,
                         size: 40,
@@ -165,7 +201,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                             'Announcement',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -205,7 +241,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                           ],
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const FaIcon(
                               FontAwesomeIcons.listCheck,
@@ -224,23 +260,50 @@ class _user_announcementPageState extends State<user_announcementPage> {
                                 ),
                               ),
                             ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.white),
+                              onPressed: () async {
+                                // Show a confirmation dialog before hiding
+                                bool confirm = await showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text("Delete All Announcements"),
+                                      content: const Text(
+                                          "Are you sure you want to delete all announcements?"),
+                                      actions: [
+                                        TextButton(
+                                          child: const Text("Cancel"),
+                                          onPressed: () {
+                                            Navigator.of(context).pop(false);
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: const Text("Delete"),
+                                          onPressed: () {
+                                            Navigator.of(context).pop(true);
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+
+                                if (confirm) {
+                                  _deleteAllAnnouncements();
+                                }
+                              },
+                            ),
                           ],
                         ),
                       ),
                       Container(
                         margin: const EdgeInsets.only(top: 20),
-                        height: MediaQuery.of(context).size.height / 3,
+                        height: MediaQuery.of(context).size.height / 2.5,
                         padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(111, 210, 31, 61),
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                            ),
-                          ],
                         ),
                         child: StreamBuilder<QuerySnapshot>(
                           stream: FirebaseFirestore.instance
@@ -250,12 +313,13 @@ class _user_announcementPageState extends State<user_announcementPage> {
                           builder: ((context, snapshot) {
                             if (snapshot.hasData) {
                               final data = snapshot.data?.docs ?? [];
+                              final visibleData = data.where((doc) => !hiddenAnnouncements.contains(doc.id)).toList();
                               return ListView.builder(
-                                itemCount: data.length,
+                                itemCount: visibleData.length,
                                 itemBuilder: (context, index) {
-                                  String id = data[index].id;
+                                  String id = visibleData[index].id;
                                   bool isClicked = clickedAnnouncements.contains(id);
-                                  var dateAndTimeRaw = data[index]['dateandtime'];
+                                  var dateAndTimeRaw = visibleData[index]['dateandtime'];
                                   DateTime dateAndTime;
 
                                   if (dateAndTimeRaw is Timestamp) {
@@ -286,7 +350,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                                     ),
                                     child: ListTile(
                                       title: Text(
-                                        data[index]['title'] ?? '',
+                                        visibleData[index]['title'] ?? '',
                                         style: TextStyle(
                                           color: isClicked ? Colors.grey : Colors.black,
                                           fontWeight: isClicked ? FontWeight.normal : FontWeight.bold,
@@ -302,8 +366,8 @@ class _user_announcementPageState extends State<user_announcementPage> {
                                         _showAnnouncementDialog(
                                           context,
                                           id,
-                                          data[index]['title'] ?? '',
-                                          data[index]['description'] ?? '',
+                                          visibleData[index]['title'] ?? '',
+                                          visibleData[index]['description'] ?? '',
                                           dateAndTime,
                                         );
                                       },

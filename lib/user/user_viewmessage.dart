@@ -40,6 +40,34 @@ class _user_viewmessagePage extends State<user_viewmessagePage> {
     }
   }
 
+  // Function to delete all messages in the conversation
+  Future<void> deleteConversation() async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+      // Query to get all messages with the current user's UID as the code
+      QuerySnapshot querySnapshot = await firestore
+          .collection('messages')
+          .where('code', isEqualTo: user!.uid)
+          .get();
+
+      // Delete each message document
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // Navigate back to the welcome page after deletion
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const user_welcomePage(),
+        ),
+      );
+    } catch (error) {
+      // Handle error here
+    }
+  }
+
   Duration duration = const Duration();
   Duration position = const Duration();
   bool isPlaying = false;
@@ -76,6 +104,42 @@ class _user_viewmessagePage extends State<user_viewmessagePage> {
               )
             ],
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.white),
+              onPressed: () async {
+                // Show a confirmation dialog before deleting
+                bool confirm = await showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text("Delete Conversation"),
+                      content: const Text(
+                          "Are you sure you want to delete the entire conversation?"),
+                      actions: [
+                        TextButton(
+                          child: const Text("Cancel"),
+                          onPressed: () {
+                            Navigator.of(context).pop(false);
+                          },
+                        ),
+                        TextButton(
+                          child: const Text("Delete"),
+                          onPressed: () {
+                            Navigator.of(context).pop(true);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (confirm) {
+                  deleteConversation();
+                }
+              },
+            ),
+          ],
         ),
         body: Container(
           color: Colors.white,

@@ -23,6 +23,7 @@ class user_welcomePage extends StatefulWidget {
 
 class _user_welcomePageState extends State<user_welcomePage> {
   Set<String> clickedAnnouncements = Set<String>();
+  Set<String> hiddenAnnouncements = Set<String>();
   bool hasUnreadAnnouncements = false;
   String unreadAnnouncementTitle = '';
   int unreadMessagesCount = 0;
@@ -60,6 +61,11 @@ class _user_welcomePageState extends State<user_welcomePage> {
 
   Future<void> _loadAnnouncementData() async {
     clickedAnnouncements = await AnnouncementHelper.loadClickedAnnouncements();
+    hiddenAnnouncements = await AnnouncementHelper.loadHiddenAnnouncements();
+    _checkUnreadAnnouncements();
+  }
+
+  void _refreshAnnouncements() {
     _checkUnreadAnnouncements();
   }
 
@@ -69,7 +75,7 @@ class _user_welcomePageState extends State<user_welcomePage> {
     String title = '';
 
     for (var doc in querySnapshot.docs) {
-      if (!clickedAnnouncements.contains(doc.id)) {
+      if (!clickedAnnouncements.contains(doc.id) && !hiddenAnnouncements.contains(doc.id)) {
         unread = true;
         title = doc['title'];
         break;
@@ -88,6 +94,10 @@ class _user_welcomePageState extends State<user_welcomePage> {
 
   Future<void> _saveClickedAnnouncements() async {
     await AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
+  }
+
+  Future<void> _saveHiddenAnnouncements() async {
+    await AnnouncementHelper.saveHiddenAnnouncements(hiddenAnnouncements);
   }
 
   NotificationDetails getDefaultNotificationDetails(String title) {
@@ -116,11 +126,8 @@ class _user_welcomePageState extends State<user_welcomePage> {
 
   void _onDidReceiveNotificationResponse(NotificationResponse notificationResponse) {
     if (notificationResponse.payload != null) {
+      // Handle the notification response
     }
-  }
-
-  void _refreshAnnouncements() {
-    _checkUnreadAnnouncements();
   }
 
   Future<void> _loadUnreadMessagesCount() async {
@@ -248,11 +255,16 @@ class _user_welcomePageState extends State<user_welcomePage> {
                                   markAsRead: (id) {
                                     setState(() {
                                       clickedAnnouncements.add(id);
-                                      _saveClickedAnnouncements();
+                                      AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
                                       _checkUnreadAnnouncements();
                                     });
                                   },
                                   onAnnouncementRead: _refreshAnnouncements,
+                                  onAnnouncementsHidden: () {
+                                    setState(() {
+                                      _loadAnnouncementData();
+                                    });
+                                  },
                                 ),
                               ),
                             ).then((_) => _refreshAnnouncements());
@@ -488,6 +500,16 @@ class AnnouncementHelper {
   static Future<void> saveClickedAnnouncements(Set<String> clickedAnnouncements) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('clickedAnnouncements', clickedAnnouncements.toList());
+  }
+
+  static Future<Set<String>> loadHiddenAnnouncements() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList('hiddenAnnouncements') ?? []).toSet();
+  }
+
+  static Future<void> saveHiddenAnnouncements(Set<String> hiddenAnnouncements) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('hiddenAnnouncements', hiddenAnnouncements.toList());
   }
 
   static Future<bool> checkUnreadAnnouncements(Set<String> clickedAnnouncements) async {

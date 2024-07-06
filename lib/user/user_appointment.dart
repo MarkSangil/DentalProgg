@@ -103,7 +103,8 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: ((context) => const UserSchedulePage()),
+                              builder: ((context) =>
+                              const UserSchedulePage()),
                             ),
                           );
                         },
@@ -165,65 +166,37 @@ class _user_appointmentPage extends State<user_appointmentPage> {
                               builder: ((context, snapshot) {
                                 if (snapshot.hasData) {
                                   final data = snapshot.data?.docs ?? [];
-                                  return Container(
-                                    padding: const EdgeInsets.all(5),
-                                    child: DataTable(
-                                      columns: const [
-                                        DataColumn(
-                                          label: Text(
-                                            'Name',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
+                                  return Center(
+                                    child: Table(
+                                      border: TableBorder.all(
+                                          color: Colors.white),
+                                      children: [
+                                        TableRow(
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xddD21f3C),
                                           ),
-                                        ),
-                                        DataColumn(
-                                          label: Text(
-                                            'Date',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                        DataColumn(
-                                          label: Text(
-                                            'Time',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                      rows: data.map((doc) {
-                                        final name = doc['name'] ?? '';
-                                        final date = doc['date'] ?? '';
-                                        final time = doc['time'] ?? '';
-                                        return DataRow(
-                                          cells: [
-                                            DataCell(Text(
-                                              name,
-                                              style: const TextStyle(
-                                                  color: Colors.white),
-                                            )),
-                                            DataCell(Text(
-                                              date,
-                                              style: const TextStyle(
-                                                  color: Colors.white),
-                                            )),
-                                            DataCell(Text(
-                                              time,
-                                              style: const TextStyle(
-                                                  color: Colors.white),
-                                            )),
+                                          children: [
+                                            _buildTableHeader('NAME'),
+                                            _buildTableHeader('DATE'),
+                                            _buildTableHeader('TIME'),
                                           ],
-                                        );
-                                      }).toList(),
+                                        ),
+                                        for (var doc in data)
+                                          TableRow(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(
+                                                  0.1),
+                                            ),
+                                            children: [
+                                              _buildTableCell(
+                                                  doc['name'] ?? ''),
+                                              _buildTableCell(
+                                                  doc['date'] ?? ''),
+                                              _buildTableCell(
+                                                  doc['time'] ?? ''),
+                                            ],
+                                          ),
+                                      ],
                                     ),
                                   );
                                 } else {
@@ -242,6 +215,34 @@ class _user_appointmentPage extends State<user_appointmentPage> {
               ),
             )
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Center(
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableCell(String content) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 15),
+      child: Center(
+        child: Text(
+          content,
+          style: const TextStyle(color: Colors.white),
         ),
       ),
     );
