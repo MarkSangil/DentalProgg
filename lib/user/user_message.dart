@@ -23,9 +23,13 @@ class _user_messagePage extends State<user_messagePage> {
     String message = messageController.text;
     if (message.isNotEmpty) {
       String timestamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+      String userId = "user_id_here"; // Replace with the actual user ID
       await FirebaseFirestore.instance.collection('messages').add({
         'message': message,
         'timestamp': timestamp,
+        'sender_id': userId,
+        'receiver_id': 'admin_id_here', // Replace with the actual admin ID
+        'read': false,
       });
       messageController.clear();
     }

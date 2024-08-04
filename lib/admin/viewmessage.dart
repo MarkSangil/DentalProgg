@@ -28,6 +28,7 @@ class _viewmessagePage extends State<viewmessagePage> {
         'message': messageText,
         'receiver_id': widget.data.uid,
         'timestamp': Timestamp.now(),
+        'read': false,
       };
 
       await firestore.collection('messages').add(messageData);
@@ -55,7 +56,7 @@ class _viewmessagePage extends State<viewmessagePage> {
             children: [
               GestureDetector(
                 child: const Icon(
-                  Icons.arrow_left,
+                  Icons.arrow_back,
                   size: 40,
                   color: Colors.white,
                 ),
