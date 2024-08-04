@@ -19,6 +19,123 @@ class messagePage extends StatefulWidget {
 
 class _messagePage extends State<messagePage> {
   final TextEditingController searchController = TextEditingController();
+
+  Future<List<Map<String, dynamic>>> _getUsersWithUnreadStatus(List<QueryDocumentSnapshot> docs) async {
+    List<Map<String, dynamic>> usersWithStatus = await Future.wait(docs.map((doc) async {
+      bool hasUnreadMessages = await _hasUnreadMessages(doc['uid']);
+      return {'doc': doc, 'hasUnreadMessages': hasUnreadMessages};
+    }).toList());
+
+    usersWithStatus.sort((a, b) {
+      int aStatus = a['hasUnreadMessages'] == true ? 1 : 0;
+      int bStatus = b['hasUnreadMessages'] == true ? 1 : 0;
+      return bStatus.compareTo(aStatus);
+    });
+
+    return usersWithStatus;
+  }
+
+  Future<bool> _hasUnreadMessages(String userId) async {
+    var unreadMessagesQuery = FirebaseFirestore.instance
+        .collection('messages')
+        .where('receiver_id', isEqualTo: '0RB7FgoLBoctIJH49Uova6zIhQD3')
+        .where('sender_id', isEqualTo: userId)
+        .where('read', isEqualTo: false);
+
+    var unreadMessagesSnapshot = await unreadMessagesQuery.get();
+    var unreadMessages = unreadMessagesSnapshot.docs;
+    return unreadMessages.isNotEmpty;
+  }
+
+  Widget _buildUserRow(QueryDocumentSnapshot doc, bool hasUnreadMessages) {
+    return GestureDetector(
+      child: Container(
+        margin: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: hasUnreadMessages
+              ? Colors.yellow[200]
+              : const Color.fromARGB(84, 165, 20, 20),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50)),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(50),
+                          child: doc['image'] == ''
+                              ? const FaIcon(
+                            FontAwesomeIcons.circleUser,
+                            size: 40,
+                          )
+                              : Image.network(
+                            doc['image'],
+                            width: 40,
+                            height: 40,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(15),
+                    child: Row(
+                      children: [
+                        Text(
+                          doc['name'] ?? '',
+                          style: TextStyle(
+                            color: hasUnreadMessages ? Colors.black : Colors.white,
+                            fontWeight: hasUnreadMessages
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            fontStyle: hasUnreadMessages
+                                ? FontStyle.italic
+                                : FontStyle.normal,
+                          ),
+                        ),
+                        if (hasUnreadMessages)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10),
+                            child: Icon(
+                              Icons.markunread,
+                              color: Colors.red,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      onTap: () {
+        markMessagesAsRead(doc['uid']);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => viewmessagePage(
+              data: firebaseDBModel(uid: doc['uid']),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -34,9 +151,7 @@ class _messagePage extends State<messagePage> {
             ),
             SingleChildScrollView(
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 margin: const EdgeInsets.only(top: 10),
                 child: Column(
                   children: [
@@ -125,14 +240,17 @@ class _messagePage extends State<messagePage> {
                                 ),
                                 GestureDetector(
                                   child: const FaIcon(
-                                    FontAwesomeIcons.search,
-                                    size: 30,
-                                    color: Colors.white,
-                                  ),
+                                      FontAwesomeIcons.magnifyingGlass,
+                                      size: 30,
+                                      color: Colors.white),
                                   onTap: () {
-                                    Navigator.push(context,
+                                    Navigator.push(
+                                      context,
                                       MaterialPageRoute(
-                                          builder: ((context) => messagesearchPage(searchtext: searchController.text))),
+                                          builder: ((context) =>
+                                              messagesearchPage(
+                                                  searchtext: searchController
+                                                      .text))),
                                     );
                                   },
                                 ),
@@ -141,86 +259,37 @@ class _messagePage extends State<messagePage> {
                           ),
                           SizedBox(
                             height: MediaQuery.of(context).size.height / 3,
-                            child: SingleChildScrollView(
-                              child: StreamBuilder<QuerySnapshot>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('users')
-                                    .where('type', isEqualTo: 'customer')
-                                    .snapshots(),
-                                builder: ((context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    final data = snapshot.data?.docs ?? [];
-                                    return Container(
-                                      padding: const EdgeInsets.all(5),
-                                      child: Table(
-                                        children: [
-                                          for (var doc in data)
-                                            TableRow(
-                                              children: [
-                                                GestureDetector(
-                                                    child: Container(
-                                                      margin:
-                                                          const EdgeInsets.all(5),
-                                                      decoration: BoxDecoration(
-                                                          color: const Color.fromARGB(84, 165, 20, 20),
-                                                          borderRadius: BorderRadius.circular(20)),
-                                                      child: Column(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              Container(
-                                                                padding: const EdgeInsets.all(5),
-                                                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
-                                                                child: Column(
-                                                                  children: [
-                                                                    SizedBox(
-                                                                      width: 40,
-                                                                      height: 40,
-                                                                      child: ClipRRect(
-                                                                        borderRadius: BorderRadius.circular(50),
-                                                                        child: doc['image'] == ''
-                                                                            ? const FaIcon(
-                                                                                FontAwesomeIcons.userCircle,
-                                                                                size: 40,
-                                                                              )
-                                                                            : Image.network(
-                                                                                doc['image'],
-                                                                                width: 40,
-                                                                                height: 40,
-                                                                              ),
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                              Expanded(child:
-                                                                    Container(
-                                                                  padding: const EdgeInsets.all(15),
-                                                                  child: Text(doc['name'] ?? '',
-                                                                    style: const TextStyle(color: Colors.white),
-                                                                  ),
-                                                                ),
-                                                              )
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    onTap: () => Navigator.push(context,
-                                                          MaterialPageRoute(builder: ((context) => viewmessagePage(
-                                                                      data: firebaseDBModel(uid: doc['uid'])))),
-                                                        ))
-                                              ],
-                                            ),
-                                        ],
-                                      ),
-                                    );
-                                  } else {
-                                    return const Text('NO DATA');
-                                  }
-                                }),
-                              ),
+                            child: StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection('users')
+                                  .where('type', isEqualTo: 'customer')
+                                  .snapshots(),
+                              builder: ((context, snapshot) {
+                                if (snapshot.hasData) {
+                                  final data = snapshot.data?.docs ?? [];
+                                  return FutureBuilder<List<Map<String, dynamic>>>(
+                                    future: _getUsersWithUnreadStatus(data),
+                                    builder: (context, futureSnapshot) {
+                                      if (futureSnapshot.connectionState == ConnectionState.waiting) {
+                                        return const Center(child: CircularProgressIndicator());
+                                      } else if (futureSnapshot.hasError) {
+                                        return const Center(child: Text('Error loading messages'));
+                                      } else {
+                                        var sortedData = futureSnapshot.data!;
+                                        return ListView.builder(
+                                          itemCount: sortedData.length,
+                                          itemBuilder: (context, index) {
+                                            var item = sortedData[index];
+                                            return _buildUserRow(item['doc'], item['hasUnreadMessages']);
+                                          },
+                                        );
+                                      }
+                                    },
+                                  );
+                                } else {
+                                  return const Text('NO DATA');
+                                }
+                              }),
                             ),
                           ),
                         ],
@@ -237,5 +306,18 @@ class _messagePage extends State<messagePage> {
         ),
       ),
     );
+  }
+
+  void markMessagesAsRead(String userId) async {
+    var unreadMessages = await FirebaseFirestore.instance
+        .collection('messages')
+        .where('receiver_id', isEqualTo: '0RB7FgoLBoctIJH49Uova6zIhQD3')
+        .where('sender_id', isEqualTo: userId)
+        .where('read', isEqualTo: false)
+        .get();
+
+    for (var doc in unreadMessages.docs) {
+      await doc.reference.update({'read': true});
+    }
   }
 }

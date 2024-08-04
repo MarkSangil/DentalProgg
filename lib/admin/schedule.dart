@@ -311,6 +311,12 @@ class _SchedulePageState extends State<SchedulePage> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Schedule Appointment'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
         body: Stack(
           children: [

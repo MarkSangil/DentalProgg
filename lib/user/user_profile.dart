@@ -114,7 +114,7 @@ class _user_profilePage extends State<user_profilePage> {
         String downloadURLTemp = await storageRef.getDownloadURL();
         setState(() {
           images = downloadURLTemp;
-          downloadURL = downloadURLTemp; // Update downloadURL here
+          downloadURL = downloadURLTemp;
         });
         print("Image uploaded successfully, URL: $downloadURL");
         await updateUserProfileImage(downloadURL);
@@ -347,7 +347,6 @@ class _user_profilePage extends State<user_profilePage> {
                     ),
                     child: TextButton(
                       onPressed: () async {
-                        // Make sure downloadURL is up-to-date before saving
                         if (image != null && downloadURL.isNotEmpty) {
                           await updateUserProfileImage(downloadURL);
                         }
@@ -363,7 +362,7 @@ class _user_profilePage extends State<user_profilePage> {
                             _ec_nameController.text,
                             _ec_contact_noController.text,
                             _relationship_to_patientController.text,
-                            downloadURL); // Pass the updated downloadURL
+                            downloadURL);
                         await showSuccessDialog();
                       },
                       child: const Text(
