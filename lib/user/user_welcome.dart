@@ -126,7 +126,6 @@ class _user_welcomePageState extends State<user_welcomePage> {
 
   void _onDidReceiveNotificationResponse(NotificationResponse notificationResponse) {
     if (notificationResponse.payload != null) {
-      // Handle the notification response
     }
   }
 
