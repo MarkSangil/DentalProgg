@@ -113,7 +113,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
     final snapshot = await FirebaseFirestore.instance.collection('announcement').get();
     for (var doc in snapshot.docs) {
       hiddenAnnouncements.add(doc.id);
-      clickedAnnouncements.add(doc.id);  // Mark as read
+      clickedAnnouncements.add(doc.id);
     }
     await AnnouncementHelper.saveHiddenAnnouncements(hiddenAnnouncements);
     await AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
@@ -155,7 +155,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                         size: 40,
                         color: Colors.black,
                       ),
-                      SizedBox(width: 10), // Added space between icon and text
+                      SizedBox(width: 10),
                       Text(
                         'USER',
                         style: TextStyle(
@@ -263,7 +263,6 @@ class _user_announcementPageState extends State<user_announcementPage> {
                             IconButton(
                               icon: Icon(Icons.delete, color: Colors.white),
                               onPressed: () async {
-                                // Show a confirmation dialog before hiding
                                 bool confirm = await showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -327,7 +326,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                                   } else if (dateAndTimeRaw is String) {
                                     dateAndTime = DateTime.parse(dateAndTimeRaw);
                                   } else {
-                                    dateAndTime = DateTime.now(); // Fallback if no valid date
+                                    dateAndTime = DateTime.now();
                                   }
 
                                   return Container(
