@@ -1,14 +1,14 @@
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AnnouncementHelper {
   static Future<Set<String>> loadClickedAnnouncements() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return (prefs.getStringList('clickedAnnouncements') ?? []).toSet();
+    return prefs.getStringList('clickedAnnouncements')?.toSet() ?? {};
   }
 
   static Future<void> saveClickedAnnouncements(Set<String> clickedAnnouncements) async {
@@ -27,18 +27,22 @@ class AnnouncementHelper {
   }
 
   static Future<bool> checkUnreadAnnouncements(Set<String> clickedAnnouncements) async {
-    final snapshot = await FirebaseFirestore.instance.collection('announcements').get();
-    final data = snapshot.docs;
-    return data.any((doc) => !clickedAnnouncements.contains(doc.id));
+    var querySnapshot = await FirebaseFirestore.instance.collection('announcement').get();
+    for (var doc in querySnapshot.docs) {
+      if (!clickedAnnouncements.contains(doc.id)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
-class user_announcementPage extends StatefulWidget {
+class UserAnnouncementPage extends StatefulWidget {
   final Function(String) markAsRead;
   final Function() onAnnouncementRead;
   final Function() onAnnouncementsHidden;
 
-  const user_announcementPage({
+  const UserAnnouncementPage({
     Key? key,
     required this.markAsRead,
     required this.onAnnouncementRead,
@@ -46,10 +50,10 @@ class user_announcementPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _user_announcementPageState createState() => _user_announcementPageState();
+  _UserAnnouncementPageState createState() => _UserAnnouncementPageState();
 }
 
-class _user_announcementPageState extends State<user_announcementPage> {
+class _UserAnnouncementPageState extends State<UserAnnouncementPage> {
   Set<String> clickedAnnouncements = Set<String>();
   Set<String> hiddenAnnouncements = Set<String>();
   bool hasUnreadAnnouncements = false;
@@ -73,7 +77,17 @@ class _user_announcementPageState extends State<user_announcementPage> {
     });
   }
 
-  void _showAnnouncementDialog(BuildContext context, String id, String title, String description, DateTime dateAndTime) {
+  Future<void> _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not launch the file URL')),
+      );
+    }
+  }
+
+  void _showAnnouncementDialog(BuildContext context, String id, String title, String description, DateTime dateAndTime, String? fileUrl) {
     setState(() {
       clickedAnnouncements.add(id);
       AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
@@ -94,6 +108,21 @@ class _user_announcementPageState extends State<user_announcementPage> {
               Text('Date: ${DateFormat('yyyy-MM-dd – kk:mm').format(dateAndTime)}'),
               SizedBox(height: 10),
               Text(description),
+              if (fileUrl != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: GestureDetector(
+                    onTap: () => _launchURL(fileUrl),
+                    child: Text(
+                      'Download Attachment',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
           actions: [
@@ -320,6 +349,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                                   bool isClicked = clickedAnnouncements.contains(id);
                                   var dateAndTimeRaw = visibleData[index]['dateandtime'];
                                   DateTime dateAndTime;
+                                  String? fileUrl = (visibleData[index].data() as Map<String, dynamic>).containsKey('fileUrl') ? visibleData[index]['fileUrl'] as String? : null;
 
                                   if (dateAndTimeRaw is Timestamp) {
                                     dateAndTime = dateAndTimeRaw.toDate();
@@ -368,6 +398,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                                           visibleData[index]['title'] ?? '',
                                           visibleData[index]['description'] ?? '',
                                           dateAndTime,
+                                          fileUrl,
                                         );
                                       },
                                     ),

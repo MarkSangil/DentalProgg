@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:dentalprogapplication/firebase_options.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:dentalprogapplication/authentication/register.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
@@ -31,6 +32,16 @@ void main() async {
   );
 
   runApp(const MyApp());
+
+  // Request storage permissions
+  await _requestStoragePermission();
+}
+
+Future<void> _requestStoragePermission() async {
+  var status = await Permission.storage.status;
+  if (!status.isGranted) {
+    status = await Permission.storage.request();
+  }
 }
 
 class MyApp extends StatelessWidget {

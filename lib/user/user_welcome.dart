@@ -250,7 +250,7 @@ class _user_welcomePageState extends State<user_welcomePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => user_announcementPage(
+                                builder: (context) => UserAnnouncementPage(
                                   markAsRead: (id) {
                                     setState(() {
                                       clickedAnnouncements.add(id);
