@@ -1,9 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AnnouncementHelper {
   static Future<Set<String>> loadClickedAnnouncements() async {
@@ -27,7 +27,7 @@ class AnnouncementHelper {
   }
 
   static Future<bool> checkUnreadAnnouncements(Set<String> clickedAnnouncements) async {
-    final snapshot = await FirebaseFirestore.instance.collection('announcements').get();
+    final snapshot = await FirebaseFirestore.instance.collection('announcement').get();
     final data = snapshot.docs;
     return data.any((doc) => !clickedAnnouncements.contains(doc.id));
   }
@@ -46,10 +46,10 @@ class user_announcementPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _user_announcementPageState createState() => _user_announcementPageState();
+  _UserAnnouncementPageState createState() => _UserAnnouncementPageState();
 }
 
-class _user_announcementPageState extends State<user_announcementPage> {
+class _UserAnnouncementPageState extends State<user_announcementPage> {
   Set<String> clickedAnnouncements = Set<String>();
   Set<String> hiddenAnnouncements = Set<String>();
   bool hasUnreadAnnouncements = false;
@@ -73,7 +73,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
     });
   }
 
-  void _showAnnouncementDialog(BuildContext context, String id, String title, String description, DateTime dateAndTime) {
+  void _showAnnouncementDialog(BuildContext context, String id, String title, String description, DateTime dateAndTime, String fileUrl) {
     setState(() {
       clickedAnnouncements.add(id);
       AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
@@ -94,6 +94,11 @@ class _user_announcementPageState extends State<user_announcementPage> {
               Text('Date: ${DateFormat('yyyy-MM-dd – kk:mm').format(dateAndTime)}'),
               SizedBox(height: 10),
               Text(description),
+              if (fileUrl.isNotEmpty)
+                ElevatedButton(
+                  onPressed: () => _launchUrl(fileUrl),
+                  child: Text('Download Attachment'),
+                ),
             ],
           ),
           actions: [
@@ -122,6 +127,15 @@ class _user_announcementPageState extends State<user_announcementPage> {
     });
 
     widget.onAnnouncementsHidden();
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not launch $url')),
+      );
+    }
   }
 
   @override
@@ -368,6 +382,7 @@ class _user_announcementPageState extends State<user_announcementPage> {
                                           visibleData[index]['title'] ?? '',
                                           visibleData[index]['description'] ?? '',
                                           dateAndTime,
+                                          visibleData[index]['fileUrl'] ?? '',
                                         );
                                       },
                                     ),
