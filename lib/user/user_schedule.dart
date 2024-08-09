@@ -238,8 +238,8 @@ class _UserSchedulePageState extends State<UserSchedulePage> {
                           Padding(
                             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                             child: TableCalendar(
-                              firstDay: firstDayOfMonth,
-                              lastDay: lastDayOfMonth,
+                              firstDay: DateTime.utc(2010, 1, 1), // Start date far in the past
+                              lastDay: DateTime.utc(2030, 12, 31), // End date far in the future
                               focusedDay: _selectedDate,
                               calendarFormat: _calendarFormat,
                               onFormatChanged: (format) {
