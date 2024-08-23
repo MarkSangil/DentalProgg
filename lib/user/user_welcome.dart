@@ -408,7 +408,7 @@ class _user_welcomePageState extends State<user_welcomePage> {
                                     ),
                                     SizedBox(height: 10),
                                     Text(
-                                      'Message',
+                                      '     Message      ',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500,

@@ -73,7 +73,7 @@ class _UserAnnouncementPageState extends State<user_announcementPage> {
     });
   }
 
-  void _showAnnouncementDialog(BuildContext context, String id, String title, String description, DateTime dateAndTime, String fileUrl) {
+  void _showAnnouncementDialog(BuildContext context, String id, String title, String description, DateTime dateAndTime) {
     setState(() {
       clickedAnnouncements.add(id);
       AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
@@ -93,12 +93,12 @@ class _UserAnnouncementPageState extends State<user_announcementPage> {
             children: [
               Text('Date: ${DateFormat('yyyy-MM-dd – kk:mm').format(dateAndTime)}'),
               SizedBox(height: 10),
-              Text(description),
-              if (fileUrl.isNotEmpty)
-                ElevatedButton(
-                  onPressed: () => _launchUrl(fileUrl),
-                  child: Text('Download Attachment'),
-                ),
+              // Text(description),
+              // if (fileUrl != null && fileUrl.isNotEmpty)
+              //   ElevatedButton(
+              //     onPressed: () => _launchUrl(fileUrl),
+              //     child: Text('Download Attachment'),
+              //   ),
             ],
           ),
           actions: [
@@ -143,11 +143,11 @@ class _UserAnnouncementPageState extends State<user_announcementPage> {
     return Scaffold(
       body: Stack(
         children: [
-          Image.asset(
-            'asset/bg.jpg',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
+          Positioned.fill(
+            child: Image.asset(
+              'asset/bg.jpg',
+              fit: BoxFit.cover,
+            ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -343,48 +343,52 @@ class _UserAnnouncementPageState extends State<user_announcementPage> {
                                     dateAndTime = DateTime.now();
                                   }
 
-                                  return Container(
-                                    margin: const EdgeInsets.symmetric(vertical: 5),
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: isClicked ? Colors.grey[200] : Colors.white,
-                                      border: Border.all(
-                                        color: isClicked ? Colors.grey : Colors.white,
-                                        width: 2,
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
-                                          spreadRadius: 1,
-                                          blurRadius: 3,
-                                        ),
-                                      ],
-                                    ),
-                                    child: ListTile(
-                                      title: Text(
+
+                                  return GestureDetector(
+                                    onTap: () {
+                                      print('Tapped on: ${visibleData[index]['title']}');
+                                      _showAnnouncementDialog(
+                                        context,
+                                        id,
                                         visibleData[index]['title'] ?? '',
-                                        style: TextStyle(
-                                          color: isClicked ? Colors.grey : Colors.black,
-                                          fontWeight: isClicked ? FontWeight.normal : FontWeight.bold,
+                                        visibleData[index]['description'] ?? '',
+                                        dateAndTime
+
+                                      );
+                                    },
+                                    child: Container(
+                                      margin: const EdgeInsets.symmetric(vertical: 5),
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: isClicked ? Colors.grey[200] : Colors.white,
+                                        border: Border.all(
+                                          color: isClicked ? Colors.grey : Colors.white,
+                                          width: 2,
                                         ),
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.1),
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                          ),
+                                        ],
                                       ),
-                                      subtitle: Text(
-                                        'Date: ${DateFormat('yyyy-MM-dd – kk:mm').format(dateAndTime)}',
-                                        style: TextStyle(
-                                          color: isClicked ? Colors.grey : Colors.black,
-                                        ),
-                                      ),
-                                      onTap: () {
-                                        _showAnnouncementDialog(
-                                          context,
-                                          id,
+                                      child: ListTile(
+                                        title: Text(
                                           visibleData[index]['title'] ?? '',
-                                          visibleData[index]['description'] ?? '',
-                                          dateAndTime,
-                                          visibleData[index]['fileUrl'] ?? '',
-                                        );
-                                      },
+                                          style: TextStyle(
+                                            color: isClicked ? Colors.grey : Colors.black,
+                                            fontWeight: isClicked ? FontWeight.normal : FontWeight.bold,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          'Date: ${DateFormat('yyyy-MM-dd – kk:mm').format(dateAndTime)}',
+                                          style: TextStyle(
+                                            color: isClicked ? Colors.grey : Colors.black,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   );
                                 },

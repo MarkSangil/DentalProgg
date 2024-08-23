@@ -17,6 +17,7 @@ class viewmessagePage extends StatefulWidget {
 class _viewmessagePage extends State<viewmessagePage> {
   final user = FirebaseAuth.instance.currentUser;
   final TextEditingController _messageController = TextEditingController();
+  int unreadMessagesCount = 0;
 
   Future<void> sendMessage(String messageText) async {
     try {
@@ -37,11 +38,23 @@ class _viewmessagePage extends State<viewmessagePage> {
     }
   }
 
-  Duration duration = const Duration();
-  Duration position = const Duration();
-  bool isPlaying = false;
-  bool isLoading = false;
-  bool isPause = false;
+  Future<void> _getUnreadMessagesCount() async {
+    var unreadMessagesSnapshot = await FirebaseFirestore.instance
+        .collection('messages')
+        .where('receiver_id', isEqualTo: user!.uid)
+        .where('read', isEqualTo: false)
+        .get();
+
+    setState(() {
+      unreadMessagesCount = unreadMessagesSnapshot.docs.length;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getUnreadMessagesCount(); // Fetch the unread messages count on initialization
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +83,36 @@ class _viewmessagePage extends State<viewmessagePage> {
               const Text(
                 'Messages',
                 style: TextStyle(color: Colors.white),
-              )
+              ),
+              Spacer(),
+              Stack(
+                children: [
+                  Icon(Icons.message, size: 40, color: Colors.white),
+                  if (unreadMessagesCount > 0) // Display the count if there are unread messages
+                    Positioned(
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 24,
+                          minHeight: 24,
+                        ),
+                        child: Text(
+                          '$unreadMessagesCount', // Unread messages count
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
         ),
@@ -86,13 +128,13 @@ class _viewmessagePage extends State<viewmessagePage> {
                       .snapshots(),
                   builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                     if (snapshot.hasError) {
-                      return const Text('Something went wrong');
+                      return const Center(child: Text('Something went wrong'));
                     }
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
+                      return const Center(child: CircularProgressIndicator());
                     }
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return const Text('No messages found');
+                      return const Center(child: Text('No messages found'));
                     }
 
                     final messages = snapshot.data!.docs;
@@ -100,7 +142,7 @@ class _viewmessagePage extends State<viewmessagePage> {
                     messages.sort((a, b) {
                       DateTime timestampA = a['timestamp'].toDate();
                       DateTime timestampB = b['timestamp'].toDate();
-                      return timestampA.compareTo(timestampB);
+                      return timestampA.compareTo(timestampB); // Sort in descending order
                     });
 
                     return ListView.builder(
