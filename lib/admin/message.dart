@@ -23,13 +23,25 @@ class _messagePage extends State<messagePage> {
   Future<List<Map<String, dynamic>>> _getUsersWithUnreadStatus(List<QueryDocumentSnapshot> docs) async {
     List<Map<String, dynamic>> usersWithStatus = await Future.wait(docs.map((doc) async {
       bool hasUnreadMessages = await _hasUnreadMessages(doc['uid']);
-      return {'doc': doc, 'hasUnreadMessages': hasUnreadMessages};
+      DateTime? lastMessageTime = await _getLastMessageTime(doc['uid']);
+      return {
+        'doc': doc,
+        'hasUnreadMessages': hasUnreadMessages,
+        'lastMessageTime': lastMessageTime
+      };
     }).toList());
 
+    // Sort by lastMessageTime (descending)
     usersWithStatus.sort((a, b) {
-      int aStatus = a['hasUnreadMessages'] == true ? 1 : 0;
-      int bStatus = b['hasUnreadMessages'] == true ? 1 : 0;
-      return bStatus.compareTo(aStatus);
+      if (a['lastMessageTime'] == null && b['lastMessageTime'] == null) {
+        return 0;
+      } else if (a['lastMessageTime'] == null) {
+        return 1;
+      } else if (b['lastMessageTime'] == null) {
+        return -1;
+      } else {
+        return b['lastMessageTime'].compareTo(a['lastMessageTime']);
+      }
     });
 
     return usersWithStatus;
@@ -45,6 +57,21 @@ class _messagePage extends State<messagePage> {
     var unreadMessagesSnapshot = await unreadMessagesQuery.get();
     var unreadMessages = unreadMessagesSnapshot.docs;
     return unreadMessages.isNotEmpty;
+  }
+
+  Future<DateTime?> _getLastMessageTime(String userId) async {
+    var lastMessageQuery = await FirebaseFirestore.instance
+        .collection('messages')
+        .where('sender_id', isEqualTo: userId)
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .get();
+
+    if (lastMessageQuery.docs.isNotEmpty) {
+      return (lastMessageQuery.docs.first['timestamp'] as Timestamp).toDate();
+    }
+
+    return null;
   }
 
   Widget _buildUserRow(QueryDocumentSnapshot doc, bool hasUnreadMessages) {

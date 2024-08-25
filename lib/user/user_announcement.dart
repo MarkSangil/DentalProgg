@@ -73,7 +73,7 @@ class _UserAnnouncementPageState extends State<user_announcementPage> {
     });
   }
 
-  void _showAnnouncementDialog(BuildContext context, String id, String title, String description, DateTime dateAndTime) {
+  void _showAnnouncementDialog(BuildContext context, String id, String title, String description, DateTime dateAndTime, String? fileUrl) {
     setState(() {
       clickedAnnouncements.add(id);
       AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
@@ -93,12 +93,12 @@ class _UserAnnouncementPageState extends State<user_announcementPage> {
             children: [
               Text('Date: ${DateFormat('yyyy-MM-dd – kk:mm').format(dateAndTime)}'),
               SizedBox(height: 10),
-              // Text(description),
-              // if (fileUrl != null && fileUrl.isNotEmpty)
-              //   ElevatedButton(
-              //     onPressed: () => _launchUrl(fileUrl),
-              //     child: Text('Download Attachment'),
-              //   ),
+              Text(description),
+              if (fileUrl != null && fileUrl.isNotEmpty) // Check for null and empty
+                ElevatedButton(
+                  onPressed: () => _launchUrl(fileUrl),
+                  child: Text('Download Attachment'),
+                ),
             ],
           ),
           actions: [
@@ -334,7 +334,6 @@ class _UserAnnouncementPageState extends State<user_announcementPage> {
                                   bool isClicked = clickedAnnouncements.contains(id);
                                   var dateAndTimeRaw = visibleData[index]['dateandtime'];
                                   DateTime dateAndTime;
-
                                   if (dateAndTimeRaw is Timestamp) {
                                     dateAndTime = dateAndTimeRaw.toDate();
                                   } else if (dateAndTimeRaw is String) {
@@ -342,18 +341,19 @@ class _UserAnnouncementPageState extends State<user_announcementPage> {
                                   } else {
                                     dateAndTime = DateTime.now();
                                   }
-
-
                                   return GestureDetector(
                                     onTap: () {
                                       print('Tapped on: ${visibleData[index]['title']}');
+                                      final docData = visibleData[index].data() as Map<String, dynamic>?; // Safely cast to Map
+                                      final fileUrl = docData != null && docData.containsKey('fileUrl') ? docData['fileUrl'] : null;
+
                                       _showAnnouncementDialog(
                                         context,
                                         id,
                                         visibleData[index]['title'] ?? '',
                                         visibleData[index]['description'] ?? '',
-                                        dateAndTime
-
+                                        dateAndTime,
+                                        fileUrl,
                                       );
                                     },
                                     child: Container(
