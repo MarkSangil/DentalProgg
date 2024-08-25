@@ -11,6 +11,8 @@ import 'package:dentalprogapplication/user/user_announcement.dart';
 import 'package:dentalprogapplication/user/user_appointment.dart';
 import 'package:dentalprogapplication/user/user_profile.dart';
 import 'package:dentalprogapplication/user/user_viewmessage.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
+
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -73,12 +75,13 @@ class _user_welcomePageState extends State<user_welcomePage> {
     var querySnapshot = await FirebaseFirestore.instance.collection('announcement').get();
     bool unread = false;
     String title = '';
+    int unreadCount = 0;
 
     for (var doc in querySnapshot.docs) {
       if (!clickedAnnouncements.contains(doc.id) && !hiddenAnnouncements.contains(doc.id)) {
         unread = true;
         title = doc['title'];
-        break;
+        unreadCount++;
       }
     }
 
@@ -90,7 +93,15 @@ class _user_welcomePageState extends State<user_welcomePage> {
     if (unread) {
       _showNotification(title);
     }
+
+    // Update the app badge with the unread count
+    if (unreadCount > 0) {
+      FlutterAppBadger.updateBadgeCount(unreadCount);
+    } else {
+      FlutterAppBadger.removeBadge();
+    }
   }
+
 
   Future<void> _saveClickedAnnouncements() async {
     await AnnouncementHelper.saveClickedAnnouncements(clickedAnnouncements);
