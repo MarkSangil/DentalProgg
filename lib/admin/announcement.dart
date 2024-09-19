@@ -1,31 +1,46 @@
-import 'package:dentalprogapplication/admin/back.dart';
-import 'package:dentalprogapplication/admin/welcome.dart';
-import 'package:dentalprogapplication/controller/controller.dart';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
-void main() {
-  runApp(const announcementPage());
-}
-
 class announcementPage extends StatefulWidget {
   const announcementPage({super.key});
 
   @override
-  _announcementPage createState() => _announcementPage();
+  _announcementPageState createState() => _announcementPageState();
 }
 
-class _announcementPage extends State<announcementPage> {
-  final TextEditingController title = TextEditingController();
-  final TextEditingController description = TextEditingController();
+class _announcementPageState extends State<announcementPage> {
+  final TextEditingController titleController = TextEditingController(); // Controller for title
+  final TextEditingController descriptionController = TextEditingController(); // Controller for description
+  PlatformFile? pickedFile;
+
+  @override
+  void dispose() {
+    // Dispose controllers when not needed to free resources
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.redAccent,
+          title: const Text("Create Announcement"),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context); // This will navigate back to the previous screen
+            },
+          ),
+        ),
         body: Stack(
           children: [
             Image.asset(
@@ -39,9 +54,8 @@ class _announcementPage extends State<announcementPage> {
               margin: const EdgeInsets.only(top: 10),
               child: ListView(
                 children: [
-                  const backPage(),
+                  const SizedBox(height: 50),
                   Container(
-                    margin: const EdgeInsets.only(top: 50),
                     padding: const EdgeInsets.all(5),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -78,9 +92,6 @@ class _announcementPage extends State<announcementPage> {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.all(10),
-                  ),
-                  Container(
                     padding: const EdgeInsets.only(bottom: 20),
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(122, 210, 31, 61),
@@ -96,14 +107,14 @@ class _announcementPage extends State<announcementPage> {
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              const FaIcon(
+                            children: const [
+                              FaIcon(
                                 FontAwesomeIcons.plusCircle,
                                 size: 50,
                                 color: Colors.white,
                               ),
-                              const SizedBox(width: 10),
-                              const Text(
+                              SizedBox(width: 10),
+                              Text(
                                 'Add Announcements',
                                 style: TextStyle(
                                     fontSize: 25,
@@ -114,12 +125,10 @@ class _announcementPage extends State<announcementPage> {
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                        ),
-                        Container(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Column(
                             children: [
+                              // Title input field
                               Container(
                                 height: 60,
                                 padding: const EdgeInsets.only(left: 10),
@@ -128,7 +137,7 @@ class _announcementPage extends State<announcementPage> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: TextField(
-                                  controller: title,
+                                  controller: titleController, // Reference the controller
                                   style: const TextStyle(fontSize: 22),
                                   decoration: const InputDecoration(
                                     labelText: 'Title:',
@@ -136,9 +145,8 @@ class _announcementPage extends State<announcementPage> {
                                   ),
                                 ),
                               ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(vertical: 10),
-                              ),
+                              const SizedBox(height: 10),
+                              // Description input field
                               Container(
                                 height: 150,
                                 padding: const EdgeInsets.only(left: 10),
@@ -147,7 +155,7 @@ class _announcementPage extends State<announcementPage> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: TextField(
-                                  controller: description,
+                                  controller: descriptionController, // Reference the controller
                                   style: const TextStyle(fontSize: 22),
                                   keyboardType: TextInputType.multiline,
                                   maxLines: null,
@@ -158,20 +166,14 @@ class _announcementPage extends State<announcementPage> {
                                   ),
                                 ),
                               ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(vertical: 10),
-                              ),
+                              const SizedBox(height: 10),
                               GestureDetector(
                                 onTap: () async {
                                   FilePickerResult? result = await FilePicker.platform.pickFiles();
                                   if (result != null) {
-                                    PlatformFile file = result.files.first;
-                                    print(file.name);
-                                    print(file.bytes);
-                                    print(file.size);
-                                    print(file.extension);
-                                    print(file.path);
-                                  } else {
+                                    setState(() {
+                                      pickedFile = result.files.first; // Store selected file
+                                    });
                                   }
                                 },
                                 child: const Text(
@@ -183,9 +185,8 @@ class _announcementPage extends State<announcementPage> {
                                   ),
                                 ),
                               ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(vertical: 10),
-                              ),
+                              const SizedBox(height: 10),
+                              // Save button
                               Container(
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
@@ -200,15 +201,23 @@ class _announcementPage extends State<announcementPage> {
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white),
                                   ),
-                                  onPressed: () {
+                                  onPressed: () async {
                                     DateTime now = DateTime.now();
-                                    String formattedDateTime =
+                                    String formattedDateAndTime =
                                     DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
-                                    Controller().Announcement(
-                                      title.text,
-                                      description.text,
-                                      formattedDateTime,
+
+                                    String? fileUrl;
+                                    if (pickedFile != null) {
+                                      fileUrl = await uploadFileToFirebase(pickedFile!);
+                                    }
+
+                                    await saveAnnouncement(
+                                      titleController.text,
+                                      descriptionController.text,
+                                      formattedDateAndTime,
+                                      fileUrl,
                                     );
+
                                     showDialog(
                                       context: context,
                                       builder: (BuildContext context) {
@@ -220,12 +229,7 @@ class _announcementPage extends State<announcementPage> {
                                           actions: [
                                             TextButton(
                                               onPressed: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: ((context) =>
-                                                      const welcomePage())),
-                                                );
+                                                Navigator.pop(context); // Close the dialog
                                               },
                                               child: const Text('OK'),
                                             ),
@@ -249,5 +253,32 @@ class _announcementPage extends State<announcementPage> {
         ),
       ),
     );
+  }
+
+  // Function to upload file to Firebase
+  Future<String> uploadFileToFirebase(PlatformFile file) async {
+    final FirebaseStorage storage = FirebaseStorage.instance;
+    final String fileName = file.name;
+    final File fileToUpload = File(file.path!);
+
+    try {
+      TaskSnapshot snapshot = await storage
+          .ref('announcements/$fileName')
+          .putFile(fileToUpload);
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading file: $e");
+      return '';
+    }
+  }
+
+  Future<void> saveAnnouncement(String title, String description, String dateandtime, String? fileUrl) async {
+    FirebaseFirestore.instance.collection('announcement').add({
+      'title': title,
+      'description': description,
+      'dateandtime': dateandtime,
+      'fileUrl': fileUrl,
+    });
   }
 }
