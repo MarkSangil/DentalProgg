@@ -80,7 +80,7 @@ class _messagePage extends State<messagePage> {
         margin: const EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: hasUnreadMessages
-              ? Colors.yellow[200]
+              ? const Color(0xFFD10000)  // Changed color to #d10000
               : const Color.fromARGB(84, 165, 20, 20),
           borderRadius: BorderRadius.circular(20),
         ),

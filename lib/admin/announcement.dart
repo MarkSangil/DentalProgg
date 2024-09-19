@@ -273,14 +273,12 @@ class _announcementPageState extends State<announcementPage> {
     }
   }
 
-  // Function to save the announcement to Firestore
   Future<void> saveAnnouncement(String title, String description, String dateandtime, String? fileUrl) async {
     FirebaseFirestore.instance.collection('announcement').add({
       'title': title,
       'description': description,
-      'dateandtime': dateandtime, // Change dateTime to dateandtime
+      'dateandtime': dateandtime,
       'fileUrl': fileUrl,
     });
   }
 }
-
