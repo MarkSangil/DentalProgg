@@ -73,12 +73,13 @@ class _user_welcomePageState extends State<user_welcomePage> {
     var querySnapshot = await FirebaseFirestore.instance.collection('announcement').get();
     bool unread = false;
     String title = '';
+    int unreadCount = 0;
 
     for (var doc in querySnapshot.docs) {
       if (!clickedAnnouncements.contains(doc.id) && !hiddenAnnouncements.contains(doc.id)) {
         unread = true;
         title = doc['title'];
-        break;
+        unreadCount++;
       }
     }
 
