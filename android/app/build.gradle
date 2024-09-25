@@ -34,10 +34,10 @@ android {
 
     signingConfigs {
         release {
-            storeFile file('/Users/khatebautista/Desktop/dentalprogg/DentalProgg/key.jks')
-            storePassword 'khate1108'
-            keyAlias 'key'
-            keyPassword 'khate1108'
+            storeFile file('/Users/khatebautista/Desktop/Dentalprog/DentalProgg/key.jks')
+            storePassword 'Gongyoo08'
+            keyAlias 'dentalprog'
+            keyPassword 'Gongyoo08'
         }
     }
 

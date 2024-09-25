@@ -17,6 +17,7 @@ class viewmessagePage extends StatefulWidget {
 class _viewmessagePage extends State<viewmessagePage> {
   final user = FirebaseAuth.instance.currentUser;
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController(); // ScrollController added
   int unreadMessagesCount = 0;
 
   Future<void> sendMessage(String messageText) async {
@@ -33,6 +34,7 @@ class _viewmessagePage extends State<viewmessagePage> {
       };
 
       await firestore.collection('messages').add(messageData);
+      _scrollToBottom(); // Scroll to bottom after sending the message
     } catch (error) {
       print('Error sending message: $error');
     }
@@ -54,6 +56,16 @@ class _viewmessagePage extends State<viewmessagePage> {
   void initState() {
     super.initState();
     _getUnreadMessagesCount(); // Fetch the unread messages count on initialization
+
+    // Ensure scrolling to the bottom after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+  }
+
+  // Scroll to bottom function
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    }
   }
 
   @override
@@ -81,7 +93,7 @@ class _viewmessagePage extends State<viewmessagePage> {
                 },
               ),
               const Text(
-                'Messages',
+                'Messagessss',
                 style: TextStyle(color: Colors.white),
               ),
               Spacer(),
@@ -142,10 +154,13 @@ class _viewmessagePage extends State<viewmessagePage> {
                     messages.sort((a, b) {
                       DateTime timestampA = a['timestamp'].toDate();
                       DateTime timestampB = b['timestamp'].toDate();
-                      return timestampA.compareTo(timestampB); // Sort in descending order
+                      return timestampA.compareTo(timestampB); // Sort in ascending order
                     });
 
+                    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom()); // Scroll after messages load
+
                     return ListView.builder(
+                      controller: _scrollController, // Attach ScrollController
                       itemCount: messages.length,
                       itemBuilder: (context, index) {
                         final message = messages[index];
@@ -218,5 +233,11 @@ class _viewmessagePage extends State<viewmessagePage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }

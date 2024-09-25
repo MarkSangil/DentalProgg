@@ -68,7 +68,7 @@ class _welcomePage extends State<welcomePage> {
                     'Record',
                     const RecordsPage(),
                     'asset/announcement.png',
-                    'Announcement',
+                    ' Announcement ',
                     const announcementPage(),
                   ),
                   _buildButtonRowWithMessageBadge(
@@ -77,7 +77,7 @@ class _welcomePage extends State<welcomePage> {
                     'Appointment',
                     const appointmentPage(),
                     'asset/message.png',
-                    'Message',
+                    ' Message ',
                     const messagePage(),
                   ),
                   _logoutButton(context),
