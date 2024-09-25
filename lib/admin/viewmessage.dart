@@ -233,6 +233,7 @@ class _viewmessagePage extends State<viewmessagePage> {
         ),
       ),
     );
+
   }
 
   @override
