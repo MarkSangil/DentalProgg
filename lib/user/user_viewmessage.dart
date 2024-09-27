@@ -17,6 +17,7 @@ class user_viewmessagePage extends StatefulWidget {
 class _user_viewmessagePage extends State<user_viewmessagePage> {
   final user = FirebaseAuth.instance.currentUser;
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController(); // Scroll controller added
 
   // Function to send the message to Firestore
   Future<void> sendMessage(String messageText) async {
@@ -35,8 +36,18 @@ class _user_viewmessagePage extends State<user_viewmessagePage> {
 
       // Add message to Firestore collection named 'messages'
       await firestore.collection('messages').add(messageData);
+
+      // Scroll to the bottom after sending the message
+      _scrollToBottom();
     } catch (error) {
       // Handle error here
+    }
+  }
+
+  // Function to scroll to the bottom of the ListView
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     }
   }
 
@@ -68,11 +79,12 @@ class _user_viewmessagePage extends State<user_viewmessagePage> {
     }
   }
 
-  Duration duration = const Duration();
-  Duration position = const Duration();
-  bool isPlaying = false;
-  bool isLoading = false;
-  bool isPause = false;
+  @override
+  void initState() {
+    super.initState();
+    // Scroll to bottom after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +188,11 @@ class _user_viewmessagePage extends State<user_viewmessagePage> {
                       }
                     }
 
+                    // Scroll to bottom after messages load
+                    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+
                     return ListView.builder(
+                      controller: _scrollController, // Attach the scroll controller here
                       itemCount: messages.length,
                       itemBuilder: (context, index) {
                         final message = messages[index];
@@ -267,5 +283,11 @@ class _user_viewmessagePage extends State<user_viewmessagePage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }
